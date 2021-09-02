@@ -2,3 +2,5 @@ vendor/
 phpunit.xml
 composer.lock
 bin/
+var/logs
+!var/logs/.gitkeep

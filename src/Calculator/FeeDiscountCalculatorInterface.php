@@ -8,5 +8,5 @@ use FeeCalcApp\DTO\TransactionDto;
 
 interface FeeDiscountCalculatorInterface
 {
-    public function calculateDiscount(TransactionDto $transactionDto, int $fee);
+    public function calculateDiscount(TransactionDto $transactionDto, string $fee): string;
 }

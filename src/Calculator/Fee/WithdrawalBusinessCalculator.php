@@ -6,12 +6,22 @@ namespace FeeCalcApp\Calculator\Fee;
 
 use FeeCalcApp\Calculator\FeeCalculatorInterface;
 use FeeCalcApp\Dto\TransactionDto;
+use FeeCalcApp\Service\Math;
 
 class WithdrawalBusinessCalculator implements FeeCalculatorInterface
 {
-    public function calculate(TransactionDto $transaction): int
+    private Math $math;
+    private float $withdrawFeeRate; //0.005
+
+    public function __construct(Math $math, float $withdrawFeeRate)
     {
-        return (int) ceil($transaction->getAmount() * 0.005);
+        $this->math = $math;
+        $this->withdrawFeeRate = $withdrawFeeRate;
+    }
+
+    public function calculate(TransactionDto $transactionDto): string
+    {
+        return $this->math->mul((string) $transactionDto->getAmount(), (string) $this->withdrawFeeRate);
     }
 
     public function isApplicable(TransactionDto $transactionDto): bool

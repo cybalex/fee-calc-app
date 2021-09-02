@@ -8,7 +8,7 @@ use FeeCalcApp\DTO\TransactionDto;
 
 class PlainPrinter implements PrinterInterface
 {
-    public function print(int $fee, int $scale, TransactionDto $transactionDto = null): void
+    public function print(string $fee, int $scale, TransactionDto $transactionDto = null): void
     {
         $fee = (float) $fee / (pow(10, $scale));
 

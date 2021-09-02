@@ -8,5 +8,5 @@ use FeeCalcApp\DTO\TransactionDto;
 
 interface PrinterInterface
 {
-    public function print(int $fee, int $scale, TransactionDto $transactionDto): void;
+    public function print(string $fee, int $scale, TransactionDto $transactionDto): void;
 }

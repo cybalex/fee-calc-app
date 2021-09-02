@@ -8,7 +8,7 @@ use FeeCalcApp\DTO\TransactionDto;
 
 interface FeeCalculatorInterface
 {
-    public function calculate(TransactionDto $transaction): int;
+    public function calculate(TransactionDto $transactionDto): string;
 
     public function isApplicable(TransactionDto $transactionDto);
 }
