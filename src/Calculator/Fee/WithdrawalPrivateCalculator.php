@@ -12,18 +12,22 @@ use FeeCalcApp\Service\TransactionHistoryManager;
 
 class WithdrawalPrivateCalculator extends WithdrawalPrivateNoDiscountCalculator implements FeeDiscountCalculatorInterface
 {
-    private const CALCULATION_CURRENCY_CODE = Currency::EUR_CODE;
-    private const FREE_WITHDRAWAL_WEEKLY_AMOUNT_PENNY = 100000; // 10 000 euro cent
-
     private ?array $transactionsWithinAWeek = null;
-
     private ExchangeRateCacheProxy $exchangeRateCacheProxy;
+    private string $defaultCurrencyCode;
+    private int $freeWithdrawalWeekly;
 
-    public function __construct(TransactionHistoryManager $transactionHistoryManager, ExchangeRateCacheProxy $cacheProxy)
-    {
+    public function __construct(
+        TransactionHistoryManager $transactionHistoryManager,
+        ExchangeRateCacheProxy $cacheProxy,
+        string $defaultCurrencyCode,
+        int $freeWithdrawalWeekly
+    ) {
         parent::__construct($transactionHistoryManager);
 
         $this->exchangeRateCacheProxy = $cacheProxy;
+        $this->defaultCurrencyCode = $defaultCurrencyCode;
+        $this->freeWithdrawalWeekly = $freeWithdrawalWeekly;
     }
 
     public function calculate(TransactionDto $transaction): int
@@ -50,23 +54,23 @@ class WithdrawalPrivateCalculator extends WithdrawalPrivateNoDiscountCalculator 
     public function calculateDiscount(TransactionDto $transactionDto, int $feeInCurrency): int
     {
         $totalAmountWithdrawalsForAWeek = $this->transactionHistoryManager
-            ->getUserTransactionsTotalAmount($this->transactionsWithinAWeek, self::CALCULATION_CURRENCY_CODE);
+            ->getUserTransactionsTotalAmount($this->transactionsWithinAWeek, $this->defaultCurrencyCode);
 
         $discountInEuroCent = floor(WithdrawalPrivateNoDiscountCalculator::WITHDRAWAL_FEE * max(
-                self::FREE_WITHDRAWAL_WEEKLY_AMOUNT_PENNY - $totalAmountWithdrawalsForAWeek,
+                $this->freeWithdrawalWeekly - $totalAmountWithdrawalsForAWeek,
                 0
             ))
         ;
 
         $transactionCurrencyCode = $transactionDto->getCurrency()->getCode();
 
-        if ($transactionCurrencyCode === self::CALCULATION_CURRENCY_CODE) {
+        if ($transactionCurrencyCode === $this->defaultCurrencyCode) {
             return min((int) $discountInEuroCent, $feeInCurrency);
         }
 
         $maxDiscountInTransactionCurrency = $discountInEuroCent * $this->exchangeRateCacheProxy->getExchangeRateForDate(
                 $transactionDto->getDate(),
-                self::CALCULATION_CURRENCY_CODE,
+                $this->defaultCurrencyCode,
                 $transactionCurrencyCode
             ) / pow(10, Currency::DEFAULT_SCALE - $transactionDto->getCurrency()->getScale())
         ;

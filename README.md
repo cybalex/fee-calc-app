@@ -70,7 +70,7 @@ docker run -it \
   --rm \
   --volume=$(pwd):/var/www/fee-calculator:z \
   fee_calc_app \
-  sh -c "composer "
+  sh -c "composer test"
 ```
 
 ## Additional info
@@ -80,9 +80,8 @@ docker run -it \
  - added json extension for parsing responses from API
  - restricted version of PHP to 7.4(and therefore had to update phpcsfixer version from 2.x to 3.x and its config)
 
-### Essential ToDo's as of 01/09/2021:
+### Essential ToDo's as of 02/09/2021:
  - create custom validator for transaction entity
  - finish up some unit test for most important classes
- - move sensitive data to configs (like API key)
 
 Happy testing :)

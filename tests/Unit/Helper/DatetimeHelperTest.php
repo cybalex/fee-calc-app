@@ -18,8 +18,10 @@ class DatetimeHelperTest extends TestCase
         $date1 = new \DateTime($date1);
         $date2 = new \DateTime($date2);
 
-        $this->assertEquals($result, DatetimeHelper::datesAreWithinSameWeek($date1, $date2));
-        $this->assertEquals($result, DatetimeHelper::datesAreWithinSameWeek($date2, $date1));
+        $dateTimeHelper = new DateTimeHelper();
+
+        $this->assertEquals($result, $dateTimeHelper->datesAreWithinSameWeek($date1, $date2));
+        $this->assertEquals($result, $dateTimeHelper->datesAreWithinSameWeek($date2, $date1));
     }
 
     public function dateTimeProvider(): \Generator

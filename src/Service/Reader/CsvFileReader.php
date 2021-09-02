@@ -28,8 +28,6 @@ class CsvFileReader implements FileReaderInterface
 
             return $data;
         } catch (RuntimeException|LogicException $e) {
-            echo "Problem opening or reading csv file ${filePath}";
-            exit;
         }
     }
 }

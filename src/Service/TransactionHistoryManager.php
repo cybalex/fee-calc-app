@@ -16,10 +16,16 @@ class TransactionHistoryManager
 
     private TransactionStorageInterface $transactionStorage;
 
-    public function __construct(ExchangeRateClientInterface $exchangeRateClient, TransactionStorageInterface $transactionStorageInterface)
-    {
+    private DatetimeHelper $dateTimeHelper;
+
+    public function __construct(
+        ExchangeRateClientInterface $exchangeRateClient,
+        TransactionStorageInterface $transactionStorageInterface,
+        DatetimeHelper $dateTimeHelper
+    ) {
         $this->exchangeRateClient = $exchangeRateClient;
         $this->transactionStorage = $transactionStorageInterface;
+        $this->dateTimeHelper = $dateTimeHelper;
     }
 
     public function add(TransactionDto $transactionDto): self
@@ -33,7 +39,7 @@ class TransactionHistoryManager
     {
         return array_filter(
             $this->transactionStorage->getAll(), function (TransactionDto $transactionFromHistory) use ($transactionDto) {
-                return DatetimeHelper::datesAreWithinSameWeek($transactionDto->getDate(), $transactionFromHistory->getDate())
+                return $this->dateTimeHelper->datesAreWithinSameWeek($transactionDto->getDate(), $transactionFromHistory->getDate())
                         && $transactionDto->getUserId() === $transactionFromHistory->getUserId()
                         && $transactionDto->getOperationType() === $transactionFromHistory->getOperationType()
                         && $transactionDto->getDate() >= $transactionFromHistory->getDate()

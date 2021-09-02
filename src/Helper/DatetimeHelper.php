@@ -4,18 +4,20 @@ declare(strict_types=1);
 
 namespace FeeCalcApp\Helper;
 
+use DateInterval;
+
 class DatetimeHelper
 {
-    public static function datesAreWithinSameWeek(\DateTime $date1, \DateTime $date2): bool
+    public function datesAreWithinSameWeek(\DateTime $date1, \DateTime $date2): bool
     {
         $daysAfterMonday = (int) $date1->format('N') - 1;
         $daysBeforeSunday = 7 - (int) $date1->format('N');
 
         $prevMonday = clone $date1;
-        $prevMonday->sub(new \DateInterval('P'.$daysAfterMonday.'D'));
+        $prevMonday->sub(new DateInterval('P'.$daysAfterMonday.'D'));
 
         $nextSunday = clone $date1;
-        $nextSunday->add(new \DateInterval('P'.$daysBeforeSunday.'D'));
+        $nextSunday->add(new DateInterval('P'.$daysBeforeSunday.'D'));
 
         return $date2 >= $prevMonday && $date2 <= $nextSunday;
     }

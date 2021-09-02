@@ -20,7 +20,7 @@ class TransactionDto
         self::OPERATION_TYPE_DEPOSIT,
     ];
 
-    private $id;
+    private string $id;
 
     private int $userId;
 

@@ -24,9 +24,9 @@ class Currency
         'JPY' => 0,
     ];
 
-    private ?string $code = null;
+    private ?string $code;
 
-    private ?int $scale = null;
+    private ?int $scale;
 
     public function __construct(string $code)
     {
