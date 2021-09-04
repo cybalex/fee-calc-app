@@ -10,4 +10,5 @@ return [
     'withdrawal_private_fee_rate' => 0.003,
     'withdrawal_business_fee_rate' => 0.005,
     'math_scale' => 2,
+    'log_file' => './var/log/logs.txt',
 ];

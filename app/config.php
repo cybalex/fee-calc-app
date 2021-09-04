@@ -5,22 +5,26 @@ use FeeCalcApp\Calculator\Fee\DepositCalculator;
 use FeeCalcApp\Calculator\Fee\WithdrawalBusinessCalculator;
 use FeeCalcApp\Calculator\Fee\WithdrawalPrivateCalculator;
 use FeeCalcApp\Calculator\Fee\WithdrawalPrivateNoDiscountCalculator;
+use FeeCalcApp\Command\CalculateFeeCommand;
 use FeeCalcApp\Service\ExchangeRate\ExchangeRateCacheProxy;
 use FeeCalcApp\Service\ExchangeRate\ExchangeRateClient;
 use FeeCalcApp\Service\ExchangeRate\ExchangeRateClientInterface;
 use FeeCalcApp\Service\FeeCalculatorCollection;
 use FeeCalcApp\Service\HttpClient\HttpClient;
 use FeeCalcApp\Service\HttpClient\HttpClientInterface;
+use FeeCalcApp\Service\Logger\FileLogger;
+use FeeCalcApp\Service\Logger\LogFormatterInterface;
+use FeeCalcApp\Service\Logger\PlainTextLogFormatter;
 use FeeCalcApp\Service\Math;
-use FeeCalcApp\Service\Printer\PlainPrinter;
-use FeeCalcApp\Service\Printer\PrinterInterface;
 use FeeCalcApp\Service\Reader\CsvFileReader;
 use FeeCalcApp\Service\Reader\FileReaderInterface;
 use FeeCalcApp\Service\Transaction\InMemoryTransactionStorage;
 use FeeCalcApp\Service\Transaction\TransactionStorageInterface;
+use FeeCalcApp\Service\TransactionBuilder;
 use FeeCalcApp\Service\TransactionHistoryManager;
 use FeeCalcApp\Service\TransactionProcessor;
 use FeeCalcApp\Service\TransactionProcessorObserver;
+use Psr\Log\LoggerInterface;
 
 $parameters = require(__DIR__ . '/parameters.php');
 
@@ -28,7 +32,6 @@ return array_merge(
     $parameters,
     [
         TransactionStorageInterface::class => DI\create(InMemoryTransactionStorage::class),
-        PrinterInterface::class => DI\create(PlainPrinter::class),
         HttpClientInterface::class => DI\create(HttpClient::class),
         FileReaderInterface::class => DI\create(CsvFileReader::class),
 
@@ -81,12 +84,28 @@ return array_merge(
         },
         TransactionProcessor::class => function (Container $c) {
             $transactionProcessor = new TransactionProcessor(
-                $c->get(FeeCalculatorCollection::class),
-                $c->get(PrinterInterface::class)
+                $c->get(FeeCalculatorCollection::class)
             );
             $transactionProcessor->attach($c->get(TransactionProcessorObserver::class));
 
             return $transactionProcessor;
+        },
+
+        LogFormatterInterface::class => DI\create(PlainTextLogFormatter::class),
+
+        LoggerInterface::class => function(Container $c) {
+            return new FileLogger($c->get(LogFormatterInterface::class, $c->get('log_file')));
+        },
+
+        CalculateFeeCommand::class => function (Container $c) {
+            $command = new CalculateFeeCommand(
+                $c->get(FileReaderInterface::class),
+                $c->get(TransactionBuilder::class),
+                $c->get(TransactionProcessor::class)
+            );
+            $command->setLogger($c->get(LoggerInterface::class));
+
+            return $command;
         }
     ]
 );

@@ -59,7 +59,7 @@ and run the command in the command line:
 docker run -it \
   --rm --volume=$(pwd):/var/www/fee-calculator:z \
   fee_calc_app \
-  sh -c "php -f public/script.php etc/input.csv"
+  sh -c "php -f public/script.php fee.calculate etc/input.csv"
 ```
 
 Feel free to modify `etc/input.csv` or use alternative input file.

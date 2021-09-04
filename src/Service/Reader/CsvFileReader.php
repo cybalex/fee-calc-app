@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace FeeCalcApp\Service\Reader;
 
-use LogicException;
+use InvalidArgumentException;
 use RuntimeException;
-use SplFileObject;
+use SplFileInfo;
 
 class CsvFileReader implements FileReaderInterface
 {
@@ -14,20 +14,27 @@ class CsvFileReader implements FileReaderInterface
 
     public function read(string $filePath): array
     {
-        try {
-            $splFile = new SplFileObject($filePath);
+        $fileInfo = new SplFileInfo($filePath);
 
-            $data = [];
-            while (!$splFile->eof()) {
-                $row = $splFile->fgetcsv(self::CSV_SEPARATOR);
-                if (!empty(current($row))) {
-                    $data[] = $row;
-                }
-                $splFile->next();
-            }
-
-            return $data;
-        } catch (RuntimeException|LogicException $e) {
+        if (!$fileInfo->isFile()) {
+            throw new InvalidArgumentException("The provided file \"$filePath\" is not a valid file");
         }
+
+        if (!$fileInfo->isReadable()) {
+            throw new RuntimeException("The provided file \"$filePath\" cannot be read");
+        }
+
+        $splFile = $fileInfo->openFile();
+
+        $data = [];
+        while (!$splFile->eof()) {
+            $row = $splFile->fgetcsv(self::CSV_SEPARATOR);
+            if (!empty(current($row))) {
+                $data[] = $row;
+            }
+            $splFile->next();
+        }
+
+        return $data;
     }
 }

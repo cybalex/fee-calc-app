@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace FeeCalcApp\Service;
 
 use FeeCalcApp\Calculator\FeeCalculatorInterface;
+use FeeCalcApp\DTO\ProcessedTransactionDto;
 use FeeCalcApp\DTO\TransactionDto;
-use FeeCalcApp\Service\Printer\PrinterInterface;
 use SplObserver;
 
 class TransactionProcessor implements \SplSubject
@@ -21,17 +21,15 @@ class TransactionProcessor implements \SplSubject
      */
     private array $feeCalculators;
 
-    private ?PrinterInterface $feePrinter;
-
     private TransactionDto $currentTransaction;
 
-    public function __construct(FeeCalculatorCollection $feeCalculatorCollection, PrinterInterface $feePrinter)
-    {
+    public function __construct(
+        FeeCalculatorCollection $feeCalculatorCollection
+    ) {
         $this->feeCalculators = $feeCalculatorCollection->get();
-        $this->feePrinter = $feePrinter;
     }
 
-    public function process(TransactionDto $transactionDto)
+    public function process(TransactionDto $transactionDto): ProcessedTransactionDto
     {
         $this->currentTransaction = $transactionDto;
 
@@ -40,10 +38,10 @@ class TransactionProcessor implements \SplSubject
                 continue;
             }
 
-            // this piece of code got some room for improvement
             $feeAmount = $feeCalculator->calculate($transactionDto);
-            $this->feePrinter->print($feeAmount, $transactionDto->getCurrency()->getScale(), $transactionDto);
             $this->notify();
+
+            return new ProcessedTransactionDto($transactionDto, $feeAmount);
         }
     }
 
