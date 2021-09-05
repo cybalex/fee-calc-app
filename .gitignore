@@ -4,3 +4,5 @@ composer.lock
 bin/
 var/log
 !var/log/.gitkeep
+var/reports
+!var/reports/.gitkeep

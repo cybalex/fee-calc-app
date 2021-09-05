@@ -11,8 +11,8 @@ use FeeCalcApp\Service\TransactionProcessor;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Throwable;
 
@@ -49,7 +49,8 @@ class CalculateFeeCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $filePath = $input->getArgument('file');
+        $filePath = $input->getOption('file');
+
         try {
             $transactionsData = $this->fileReader->read($filePath);
 
@@ -82,15 +83,11 @@ class CalculateFeeCommand extends Command
     protected function configure()
     {
         $this
-            ->addArgument(
+            ->addOption(
                 'file',
-                InputArgument::REQUIRED,
+                null,
+                InputOption::VALUE_REQUIRED,
                 'Path to file'
-            )
-            ->addArgument(
-                'env',
-                InputArgument::OPTIONAL,
-                'Execution environment'
             );
     }
 }

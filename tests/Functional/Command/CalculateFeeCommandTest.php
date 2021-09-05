@@ -20,7 +20,7 @@ class CalculateFeeCommandTest extends TestCase
         $command = $container->get(CalculateFeeCommand::class);
 
         $commandTester = new CommandTester($command);
-        $commandTester->execute(['file' => 'etc/input.csv']);
+        $commandTester->execute(['--file' => 'etc/input.csv']);
 
         $this->assertEquals(<<<TEXT
 0.60
