@@ -59,20 +59,22 @@ return array_merge(
 
         WithdrawalPrivateCalculator::class => function(Container $c) {
             return new WithdrawalPrivateCalculator(
-                $c->get(TransactionHistoryManager::class),
-                $c->get(ExchangeRateCacheProxy::class),
                 $c->get(Math::class),
+                $c->get(TransactionHistoryManager::class),
                 $c->get('withdrawal_private_fee_rate'),
+                $c->get('private_withdrawal_max_weekly_discounts_number'),
+
+                $c->get(ExchangeRateCacheProxy::class),
                 $c->get('default_currency_code'),
                 $c->get('private_withdrawal_free_weekly_amount'),
-                $c->get('private_withdrawal_max_weekly_discounts_number')
             );
         },
         WithdrawalPrivateNoDiscountCalculator::class => function (Container $c) {
             return new WithdrawalPrivateNoDiscountCalculator(
                 $c->get(Math::class),
                 $c->get(TransactionHistoryManager::class),
-                $c->get('withdrawal_private_fee_rate')
+                $c->get('withdrawal_private_fee_rate'),
+                $c->get('private_withdrawal_max_weekly_discounts_number')
             );
         },
         FeeCalculatorCollection::class => function (Container $c) {
@@ -94,7 +96,7 @@ return array_merge(
         LogFormatterInterface::class => DI\create(PlainTextLogFormatter::class),
 
         LoggerInterface::class => function(Container $c) {
-            return new FileLogger($c->get(LogFormatterInterface::class, $c->get('log_file')));
+            return new FileLogger($c->get(LogFormatterInterface::class), $c->get('log_file'));
         },
 
         CalculateFeeCommand::class => function (Container $c) {

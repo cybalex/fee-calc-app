@@ -7,40 +7,41 @@ namespace FeeCalcApp\Calculator\Fee;
 use FeeCalcApp\Calculator\FeeDiscountCalculatorInterface;
 use FeeCalcApp\DTO\Currency;
 use FeeCalcApp\Dto\TransactionDto;
-use FeeCalcApp\Service\ExchangeRate\ExchangeRateCacheProxy;
+use FeeCalcApp\Service\ExchangeRate\ExchangeRateClientInterface;
 use FeeCalcApp\Service\Math;
 use FeeCalcApp\Service\TransactionHistoryManager;
 
 class WithdrawalPrivateCalculator extends WithdrawalPrivateNoDiscountCalculator implements FeeDiscountCalculatorInterface
 {
     private ?array $transactionsWithinAWeek = null;
-    private ExchangeRateCacheProxy $exchangeRateCacheProxy;
+
+    private ExchangeRateClientInterface $exchangeRateClient;
+
     private string $defaultCurrencyCode;
+
     private int $freeWithdrawalWeeklyAmount;
-    private int $maxWeeklyDiscountsNumber;
 
     public function __construct(
-        TransactionHistoryManager $transactionHistoryManager,
-        ExchangeRateCacheProxy $cacheProxy,
         Math $math,
+        TransactionHistoryManager $transactionHistoryManager,
         float $withdrawalFeeRate,
+        int $maxWeeklyDiscountsNumber,
+        ExchangeRateClientInterface $exchangeRateClient,
         string $defaultCurrencyCode,
-        int $freeWithdrawalWeeklyAmount,
-        int $maxWeeklyDiscountsNumber
+        int $freeWithdrawalWeeklyAmount
     ) {
-        parent::__construct($math, $transactionHistoryManager, $withdrawalFeeRate);
+        parent::__construct($math, $transactionHistoryManager, $withdrawalFeeRate, $maxWeeklyDiscountsNumber);
 
-        $this->exchangeRateCacheProxy = $cacheProxy;
+        $this->exchangeRateClient = $exchangeRateClient;
         $this->defaultCurrencyCode = $defaultCurrencyCode;
         $this->freeWithdrawalWeeklyAmount = $freeWithdrawalWeeklyAmount;
-        $this->maxWeeklyDiscountsNumber = $maxWeeklyDiscountsNumber;
     }
 
     public function calculate(TransactionDto $transactionDto): string
     {
-        $maxFee = parent::calculate($transactionDto);
+        $maxFeeInCurrency = parent::calculate($transactionDto);
 
-        return $this->math->sub($maxFee, $this->calculateDiscount($transactionDto, $maxFee));
+        return $this->math->sub($maxFeeInCurrency, $this->calculateDiscount($transactionDto, $maxFeeInCurrency));
     }
 
     public function isApplicable(TransactionDto $transactionDto): bool
@@ -57,7 +58,7 @@ class WithdrawalPrivateCalculator extends WithdrawalPrivateNoDiscountCalculator 
         return count($this->transactionsWithinAWeek) < $this->maxWeeklyDiscountsNumber;
     }
 
-    public function calculateDiscount(TransactionDto $transactionDto, string $feeInCurrency): string
+    public function calculateDiscount(TransactionDto $transactionDto, string $maxFeeInCurrency): string
     {
         $totalAmountWithdrawalsForAWeek = $this->transactionHistoryManager
             ->getUserTransactionsTotalAmount($this->transactionsWithinAWeek, $this->defaultCurrencyCode);
@@ -73,14 +74,14 @@ class WithdrawalPrivateCalculator extends WithdrawalPrivateNoDiscountCalculator 
         $transactionCurrencyCode = $transactionDto->getCurrency()->getCode();
 
         if ($transactionCurrencyCode === $this->defaultCurrencyCode) {
-            return $this->math->floor($this->math->min($discountInEuroCent, $feeInCurrency));
+            return $this->math->floor($this->math->min($discountInEuroCent, $maxFeeInCurrency));
         }
 
         $maxDiscountInTransactionCurrency =
             $this->math->div(
                 $this->math->mul(
                     $discountInEuroCent,
-                    (string) $this->exchangeRateCacheProxy->getExchangeRateForDate(
+                    (string) $this->exchangeRateClient->getExchangeRateForDate(
                         $transactionDto->getDate(),
                         $this->defaultCurrencyCode,
                         $transactionCurrencyCode
@@ -89,6 +90,6 @@ class WithdrawalPrivateCalculator extends WithdrawalPrivateNoDiscountCalculator 
             )
         ;
 
-        return $this->math->floor($this->math->min($maxDiscountInTransactionCurrency, $feeInCurrency));
+        return $this->math->floor($this->math->min($maxDiscountInTransactionCurrency, $maxFeeInCurrency));
     }
 }
