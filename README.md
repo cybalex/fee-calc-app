@@ -59,10 +59,12 @@ and run the command in the command line:
 docker run -it \
   --rm --volume=$(pwd):/var/www/fee-calculator:z \
   fee_calc_app \
-  sh -c "php -f public/script.php etc/input.csv"
+  sh -c "php -f public/script.php fee.calculate --file=etc/input.csv"
 ```
 
 Feel free to modify `etc/input.csv` or use alternative input file.
+
+## Running tests
 
 Run the following command from command line to run the unit and functional tests:
 ```bash
@@ -70,8 +72,18 @@ docker run -it \
   --rm \
   --volume=$(pwd):/var/www/fee-calculator:z \
   fee_calc_app \
-  sh -c "composer "
+  sh -c "composer test"
 ```
+
+Run tests with coverage by executing the following command from CLI:
+```bash
+docker run -it \
+  --rm \
+  --volume=$(pwd):/var/www/fee-calculator:z \
+  fee_calc_app \
+  sh -c "composer test-coverage"
+```
+Coverage report will be available under `var/reports/coverage` directory.
 
 ## Additional info
 
@@ -80,9 +92,7 @@ docker run -it \
  - added json extension for parsing responses from API
  - restricted version of PHP to 7.4(and therefore had to update phpcsfixer version from 2.x to 3.x and its config)
 
-### Essential ToDo's as of 01/09/2021:
+### Essential ToDo's as of 02/09/2021:
  - create custom validator for transaction entity
- - finish up some unit test for most important classes
- - move sensitive data to configs (like API key)
 
 Happy testing :)

@@ -16,10 +16,20 @@ class TransactionHistoryManager
 
     private TransactionStorageInterface $transactionStorage;
 
-    public function __construct(ExchangeRateClientInterface $exchangeRateClient, TransactionStorageInterface $transactionStorageInterface)
-    {
+    private DatetimeHelper $dateTimeHelper;
+
+    private Math $math;
+
+    public function __construct(
+        ExchangeRateClientInterface $exchangeRateClient,
+        TransactionStorageInterface $transactionStorageInterface,
+        DatetimeHelper $dateTimeHelper,
+        Math $math
+    ) {
         $this->exchangeRateClient = $exchangeRateClient;
         $this->transactionStorage = $transactionStorageInterface;
+        $this->dateTimeHelper = $dateTimeHelper;
+        $this->math = $math;
     }
 
     public function add(TransactionDto $transactionDto): self
@@ -33,7 +43,7 @@ class TransactionHistoryManager
     {
         return array_filter(
             $this->transactionStorage->getAll(), function (TransactionDto $transactionFromHistory) use ($transactionDto) {
-                return DatetimeHelper::datesAreWithinSameWeek($transactionDto->getDate(), $transactionFromHistory->getDate())
+                return $this->dateTimeHelper->datesAreWithinSameWeek($transactionDto->getDate(), $transactionFromHistory->getDate())
                         && $transactionDto->getUserId() === $transactionFromHistory->getUserId()
                         && $transactionDto->getOperationType() === $transactionFromHistory->getOperationType()
                         && $transactionDto->getDate() >= $transactionFromHistory->getDate()
@@ -45,22 +55,28 @@ class TransactionHistoryManager
     /**
      * @param TransactionDto[] $transactions
      */
-    public function getUserTransactionsTotalAmount(?array $transactions, string $inCurrency): int
+    public function getUserTransactionsTotalAmount(?array $transactions, string $inCurrency): string
     {
-        $totalAmount = 0;
+        $totalAmount = '0';
 
         foreach ($transactions as $transaction) {
             $transactionCurrencyCode = $transaction->getCurrency()->getCode();
 
             $transactionAmount = $transactionCurrencyCode === $inCurrency
-                ? $transaction->getAmount()
-                : $transaction->getAmount() / $this->exchangeRateClient->getExchangeRateForDate(
-                    $transaction->getDate(),
-                    $inCurrency,
-                    $transactionCurrencyCode
-                ) * pow(10, Currency::DEFAULT_SCALE - $transaction->getCurrency()->getScale())
+                ? (string) $transaction->getAmount()
+                : $this->math->mul(
+                    $this->math->div(
+                        (string) $transaction->getAmount(),
+                        (string) $this->exchangeRateClient->getExchangeRateForDate(
+                            $transaction->getDate(),
+                            $inCurrency,
+                            $transactionCurrencyCode
+                        )
+                    ),
+                    (string) pow(10, Currency::DEFAULT_SCALE - $transaction->getCurrency()->getScale())
+                )
             ;
-            $totalAmount += (int) round($transactionAmount);
+            $totalAmount = $this->math->add($totalAmount, $transactionAmount);
         }
 
         return $totalAmount;

@@ -12,16 +12,16 @@ use FeeCalcApp\Service\HttpClient\HttpClientInterface;
  */
 class ExchangeRateClient implements ExchangeRateClientInterface
 {
-    private const URL_HOST = 'http://api.currencylayer.com';
-    private const PATH = '/live';
-    private const API_KEY = '6ba50a7460abb5dacb95c02de8caa194';
-    private const USD_CODE = Currency::USD_CODE;
-
     private HttpClientInterface $httpClient;
 
-    public function __construct(HttpClientInterface $httpClient)
+    private string $currencyApiUrl;
+    private string $currencyApiKey;
+
+    public function __construct(HttpClientInterface $httpClient, string $curencyApiUrl, string $currencyApiKey)
     {
         $this->httpClient = $httpClient;
+        $this->currencyApiUrl = $curencyApiUrl;
+        $this->currencyApiKey = $currencyApiKey;
     }
 
     /**
@@ -34,7 +34,7 @@ class ExchangeRateClient implements ExchangeRateClientInterface
     public function getExchangeRateForDate(\DateTime $date, string $currency1, string $currency2): float
     {
         $queryParams = [
-            'access_key' => self::API_KEY,
+            'access_key' => $this->currencyApiKey,
             'currencies' => implode(',', [$currency1, $currency2]),
             'format' => 1,
         ];
@@ -45,23 +45,25 @@ class ExchangeRateClient implements ExchangeRateClientInterface
             ],
         ];
 
-        $response = $this->httpClient->get(self::URL_HOST.self::PATH, $queryParams, $options);
+        $response = $this->httpClient->get($this->currencyApiUrl, $queryParams, $options);
 
         try {
             $responseData = json_decode($response, true, 512, JSON_THROW_ON_ERROR);
         } catch (\JsonException $e) {
-            throw new \RuntimeException('Failed to decode response remote server');
+            throw new \RuntimeException('Failed to decode remote server response');
         }
 
         if (
-            !isset($responseData['quotes'][self::USD_CODE.$currency1])
-            || !isset($responseData['quotes'][self::USD_CODE.$currency2])
+            !isset(
+                $responseData['quotes'][Currency::USD_CODE.$currency1],
+                $responseData['quotes'][Currency::USD_CODE.$currency2]
+            )
         ) {
             throw new \RuntimeException('Invalid response format was provided from currency API: '.$response);
         }
 
-        $currencySourceToUSD = (float) $responseData['quotes'][self::USD_CODE.$currency1];
-        $currencyDestinationToUSD = (float) $responseData['quotes'][self::USD_CODE.$currency2];
+        $currencySourceToUSD = (float) $responseData['quotes'][Currency::USD_CODE.$currency1];
+        $currencyDestinationToUSD = (float) $responseData['quotes'][Currency::USD_CODE.$currency2];
 
         return $currencyDestinationToUSD / $currencySourceToUSD;
     }

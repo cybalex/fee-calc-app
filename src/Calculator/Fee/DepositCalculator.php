@@ -6,14 +6,22 @@ namespace FeeCalcApp\Calculator\Fee;
 
 use FeeCalcApp\Calculator\FeeCalculatorInterface;
 use FeeCalcApp\Dto\TransactionDto;
+use FeeCalcApp\Service\Math;
 
 class DepositCalculator implements FeeCalculatorInterface
 {
-    private const FEE_RATE = 0.0003;
+    private float $feeRate;
+    private Math $math;
 
-    public function calculate(TransactionDto $transaction): int
+    public function __construct(Math $math, float $feeRate)
     {
-        return (int) ceil($transaction->getAmount() * self::FEE_RATE);
+        $this->math = $math;
+        $this->feeRate = $feeRate;
+    }
+
+    public function calculate(TransactionDto $transactionDto): string
+    {
+        return $this->math->mul((string) $transactionDto->getAmount(), (string) $this->feeRate);
     }
 
     public function isApplicable(TransactionDto $transactionDto): bool

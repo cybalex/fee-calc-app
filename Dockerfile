@@ -11,5 +11,10 @@ RUN set -ex; \
     && chmod a+x /usr/local/bin/composer \
     && composer self-update --no-interaction 2>/dev/null
 
+RUN set -ex; \
+    apk add --update $PHPIZE_DEPS \
+    && pecl install pcov \
+	&& docker-php-ext-enable pcov
+
 RUN mkdir -p /var/www/fee-calculator
 WORKDIR /var/www/fee-calculator

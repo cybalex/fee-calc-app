@@ -6,25 +6,31 @@ namespace FeeCalcApp\Unit\Calculator\Fee;
 
 use FeeCalcApp\Calculator\Fee\DepositCalculator;
 use FeeCalcApp\DTO\TransactionDto;
+use FeeCalcApp\Service\Math;
 use PHPUnit\Framework\TestCase;
 
 class DepositCalculatorTest extends TestCase
 {
-    /**
-     * @dataProvider amountProvider
-     */
-    public function testCalculate(int $transactionAmount, $expectedFeeAmount): void
+    private const FEE_RATE = 0.0003;
+
+    private Math $math;
+
+    protected function setUp()
     {
-        $transactionDto = $this->createMock(TransactionDto::class);
-        $transactionDto->expects($this->once())->method('getAmount')->with()->willReturn($transactionAmount);
-        $this->assertEquals($expectedFeeAmount, (new DepositCalculator())->calculate($transactionDto));
+        $this->math = new Math(2);
     }
 
-    public function amountProvider(): \Generator
+    public function testCalculate(): void
     {
-        yield [100000, 30];
-        yield [100001, 31];
-        yield [100002, 31];
+        $math = $this->createMock(Math::class);
+        $math->expects($this->once())->method('mul')
+            ->with('100002.00', (string) self::FEE_RATE)
+            ->willReturn('30.00');
+
+
+        $transactionDto = $this->createMock(TransactionDto::class);
+        $transactionDto->expects($this->once())->method('getAmount')->with()->willReturn(100002);
+        $this->assertEquals('30.00', (new DepositCalculator($math, self::FEE_RATE))->calculate($transactionDto));
     }
 
     /**
@@ -32,7 +38,7 @@ class DepositCalculatorTest extends TestCase
      */
     public function testApplicable(string $operationType, bool $expectedResult): void
     {
-        $depositCalculator = new DepositCalculator();
+        $depositCalculator = new DepositCalculator($this->math, self::FEE_RATE);
         $transactionDto = $this->createMock(TransactionDto::class);
         $transactionDto->expects($this->once())->method('getOperationType')->with()->willReturn($operationType);
         $this->assertEquals($expectedResult, $depositCalculator->isApplicable($transactionDto));
