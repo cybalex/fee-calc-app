@@ -34,5 +34,6 @@ class DatetimeHelperTest extends TestCase
         yield ['2021-08-30', '2021-09-05', true];
         yield ['2021-08-30', '2021-09-06', false];
         yield ['2016-01-10', '2016-01-07', true];
+        yield ['2014-12-29 0:0:0', '2015-01-01 23:59:59', true];
     }
 }

@@ -28,11 +28,7 @@ class FileLogger extends AbstractLogger
     {
         $splFileInfo = new \SplFileInfo($this->logFile);
 
-        if (!$splFileInfo->isFile()) {
-            throw new \RuntimeException(sprintf('Log file "%s" location is not a valid file', $this->logFile));
-        }
-
-        if (!$splFileInfo->isWritable()) {
+        if ($splFileInfo->isFile() && !$splFileInfo->isWritable()) {
             throw new \RuntimeException(sprintf('Log file "%s" is not writable', $this->logFile));
         }
 

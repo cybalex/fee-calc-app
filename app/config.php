@@ -4,14 +4,13 @@ use DI\Container;
 use FeeCalcApp\Calculator\Fee\DepositCalculator;
 use FeeCalcApp\Calculator\Fee\WithdrawalBusinessCalculator;
 use FeeCalcApp\Calculator\Fee\WithdrawalPrivateCalculator;
+use FeeCalcApp\Calculator\Fee\WithdrawalPrivateCustomCurrencyCalculator;
 use FeeCalcApp\Calculator\Fee\WithdrawalPrivateNoDiscountCalculator;
 use FeeCalcApp\Command\CalculateFeeCommand;
 use FeeCalcApp\Service\ExchangeRate\ExchangeRateCacheProxy;
-use FeeCalcApp\Service\ExchangeRate\ExchangeRateClient;
 use FeeCalcApp\Service\ExchangeRate\ExchangeRateClientInterface;
+use FeeCalcApp\Service\ExchangeRate\ExchangeRateHttpClient;
 use FeeCalcApp\Service\FeeCalculatorCollection;
-use FeeCalcApp\Service\HttpClient\HttpClient;
-use FeeCalcApp\Service\HttpClient\HttpClientInterface;
 use FeeCalcApp\Service\Logger\FileLogger;
 use FeeCalcApp\Service\Logger\LogFormatterInterface;
 use FeeCalcApp\Service\Logger\PlainTextLogFormatter;
@@ -32,7 +31,6 @@ return array_merge(
     $parameters,
     [
         TransactionStorageInterface::class => DI\create(InMemoryTransactionStorage::class),
-        HttpClientInterface::class => DI\create(HttpClient::class),
         FileReaderInterface::class => DI\create(CsvFileReader::class),
 
         Math::class => function (Container $c) {
@@ -40,11 +38,12 @@ return array_merge(
         },
 
         ExchangeRateClientInterface::class => function(Container $c) {
-            $exchangeRateClient = new ExchangeRateClient(
-                    $c->get(HttpClientInterface::class),
-                    $c->get('currency_api_url'),
-                    $c->get('currency_api_key')
-                );
+            $exchangeRateClient = new ExchangeRateHttpClient(
+                $c->get('currency_api_url'),
+                $c->get('currency_api_key')
+            );
+
+            $exchangeRateClient->setLogger($c->get(LoggerInterface::class));
 
             return new ExchangeRateCacheProxy($exchangeRateClient);
         },
@@ -63,7 +62,16 @@ return array_merge(
                 $c->get(TransactionHistoryManager::class),
                 $c->get('withdrawal_private_fee_rate'),
                 $c->get('private_withdrawal_max_weekly_discounts_number'),
-
+                $c->get('default_currency_code'),
+                $c->get('private_withdrawal_free_weekly_amount'),
+            );
+        },
+        WithdrawalPrivateCustomCurrencyCalculator::class => function(Container $c) {
+            return new WithdrawalPrivateCustomCurrencyCalculator(
+                $c->get(Math::class),
+                $c->get(TransactionHistoryManager::class),
+                $c->get('withdrawal_private_fee_rate'),
+                $c->get('private_withdrawal_max_weekly_discounts_number'),
                 $c->get(ExchangeRateCacheProxy::class),
                 $c->get('default_currency_code'),
                 $c->get('private_withdrawal_free_weekly_amount'),
@@ -82,7 +90,8 @@ return array_merge(
                 ->add($c->get(DepositCalculator::class))
                 ->add($c->get(WithdrawalBusinessCalculator::class))
                 ->add($c->get(WithdrawalPrivateCalculator::class))
-                ->add($c->get(WithdrawalPrivateNoDiscountCalculator::class));
+                ->add($c->get(WithdrawalPrivateNoDiscountCalculator::class))
+                ->add($c->get(WithdrawalPrivateCustomCurrencyCalculator::class));
         },
         TransactionProcessor::class => function (Container $c) {
             $transactionProcessor = new TransactionProcessor(

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace FeeCalcApp\Unit\Calculator\Fee;
 
 use FeeCalcApp\Calculator\Fee\WithdrawalPrivateCalculator;
+use FeeCalcApp\Calculator\Fee\WithdrawalPrivateCustomCurrencyCalculator;
 use FeeCalcApp\DTO\Currency;
 use FeeCalcApp\DTO\TransactionDto;
 use FeeCalcApp\Service\ExchangeRate\ExchangeRateCacheProxy;
@@ -13,7 +14,7 @@ use FeeCalcApp\Service\TransactionHistoryManager;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
-class WithdrawPrivateCalculatorTest extends TestCase
+class WithdrawalPrivateCustomCurrencyTest extends TestCase
 {
     private const USER_ID = 1;
 
@@ -39,8 +40,6 @@ class WithdrawPrivateCalculatorTest extends TestCase
      */
     private $exchangeRateCacheProxy;
 
-    private array $constructorArgs;
-
 
     public function setUp()
     {
@@ -49,17 +48,15 @@ class WithdrawPrivateCalculatorTest extends TestCase
 
         $this->exchangeRateCacheProxy = $this->createMock(ExchangeRateCacheProxy::class);
 
-        $this->constructorArgs = [
+        $this->calculator = new WithdrawalPrivateCustomCurrencyCalculator(
             $this->math,
             $this->transactionHistoryManager,
             self::WITHDRAWAL_FEE_RATE,
             self::FREE_WITHDRAWALS_WEEKLY,
             $this->exchangeRateCacheProxy,
             self::DEFAULT_CURRENCY_CODE,
-            self::FREE_WITHDRAWAL_WEEKLY_AMOUNT,
-        ];
-
-        $this->calculator = new WithdrawalPrivateCalculator(...$this->constructorArgs);
+            self::FREE_WITHDRAWAL_WEEKLY_AMOUNT
+        );
     }
 
     /**
@@ -77,65 +74,6 @@ class WithdrawPrivateCalculatorTest extends TestCase
             );
 
         $this->assertEquals($expectedResult, $this->calculator->isApplicable($transactionDto));
-    }
-
-    public function testCalculate(): void
-    {
-        $amount = 1300;
-        $discount = '1.00';
-        $transactionDto = $this->getApplicableTransaction($amount);
-
-        $calculator = $this
-            ->getMockBuilder(WithdrawalPrivateCalculator::class)
-            ->setConstructorArgs($this->constructorArgs)
-            ->setMethods(['calculateDiscount'])
-            ->getMock();
-
-        $calculator
-            ->expects($this->once())
-            ->method('calculateDiscount')
-            ->with($transactionDto)
-            ->willReturn($discount);
-
-        $this->math
-            ->expects($this->once())
-            ->method('mul')
-            ->with((string) $amount, (string) self::WITHDRAWAL_FEE_RATE)
-            ->willReturn('10.50');
-
-        $this->math->expects($this->once())->method('sub')->with('10.50', $discount)
-            ->willReturn('9.50');
-
-        $this->assertEquals('9.50', $calculator->calculate($transactionDto));
-    }
-
-    public function testCalculateDiscountSameCurrency(): void
-    {
-        $amount = 1100;
-        $maxFeeInCurrency = '10.00';
-        $transactionDto = $this->getApplicableTransaction($amount);
-
-        $historyTransaction = $this->createMock(TransactionDto::class);
-
-
-        $this->transactionHistoryManager->expects($this->once())->method('getUserTransactionsWithinAWeek')
-            ->with($transactionDto)->willReturn([$historyTransaction]);
-
-        $this->transactionHistoryManager->expects($this->once())->method('getUserTransactionsTotalAmount')
-            ->with([$historyTransaction], self::DEFAULT_CURRENCY_CODE)->willReturn('900.00');
-
-        $this->math->expects($this->once())
-            ->method('sub')
-            ->with('1000', '900.00')
-            ->willReturn('100.00');
-
-        $this->math->expects($this->once())->method('mul')->with('0.01', '100.00')->willReturn('1.00');
-        $this->math->expects($this->once())->method('max')->with('100.00', '0')->willReturn('100.00');
-        $this->math->expects($this->once())->method('min')->with('1.00', $maxFeeInCurrency)->willReturn('1.00');
-        $this->math->expects($this->once())->method('floor')->with('1.00')->willReturn('1');
-
-        $this->assertTrue($this->calculator->isApplicable($transactionDto));
-        $this->assertEquals('1', $this->calculator->calculateDiscount($transactionDto, $maxFeeInCurrency));
     }
 
     public function testCalculateDiscountDifferentCurrencies(): void
@@ -193,16 +131,22 @@ class WithdrawPrivateCalculatorTest extends TestCase
 
         yield [
             $this->getApplicableTransaction(13000),
-            true,
+            false,
             3,
             false,
         ];
 
         yield [
-            $this->getApplicableTransaction(13000),
+            $this->getApplicableTransaction(13000, Currency::JPY_CODE),
             true,
             2,
             true,
+        ];
+        yield [
+            $this->getApplicableTransaction(13000),
+            false,
+            2,
+            false,
         ];
     }
 
