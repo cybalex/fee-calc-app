@@ -1,7 +1,5 @@
 <?php
 
-use DI\Container;
-
 return [
     'supported_operation_types' => [
         'withdraw',
@@ -35,74 +33,4 @@ return [
     'withdrawal_private_fee_rate' => 0.003,
     'withdrawal_business_fee_rate' => 0.005,
     'log_file' => './var/log/logs.txt',
-
-    // under construction
-
-//    'fee_calculation_config_setup' => [
-//        'deposit' => [
-//            'enabled' => true,
-//            'params' => [
-//                'fee_rate' => function(Container $c) {
-//                    return $c->get('deposit_fee_rate');
-//                },
-//            ],
-//            'requirements' => [
-//                'operation_type' => 'deposit',
-//            ]
-//        ],
-//        'withdrawal_business' => [
-//            'enabled' => true,
-//            'params' => [
-//                'fee_rate' => function(Container $c) {
-//                    return $c->get('withdrawal_business_fee_rate');
-//                },
-//            ],
-//            'requirements' => [
-//                'client_type' => 'business',
-//                'operation_type' => 'withdrawal',
-//            ]
-//        ],
-//        'withdrawal_private_no_discount' => [
-//            'enabled' => true,
-//            'params' => [
-//                'operation_type' => 'withdrawal',
-//                'client_type' => 'private',
-//                'fee_rate' => function(Container $c) {
-//                    return $c->get('withdrawal_private_fee_rate');
-//                },
-//                'max_weekly_discounts_number' => function (Container $c) {
-//                    return $c->get('private_withdrawal_max_weekly_discounts_number');
-//                },
-//            ],
-//            'requirements' => [
-//                'weekly_transactions' => ['>=', function (Container $c) {
-//                    return $c->get('private_withdrawal_max_weekly_discounts_number');
-//                }],
-//                'currency_code' => function (Container $c) {
-//                    return $c->get('currency_default_code');
-//                }
-//            ],
-//        ],
-//        'withdrawal_private' => [
-//            'extends' => 'withdrawal_private_no_discount',
-//            'props' => [
-//                'free_weekly_transaction_amount' => function (Container $c) {
-//                    return $c->get('private_withdrawal_free_weekly_amount');
-//                }
-//            ],
-//            'requirements' => [
-//                'weekly_transactions' => ['<', function (Container $c) {
-//                    return $c->get('private_withdrawal_max_weekly_discounts_number');
-//                }],
-//            ]
-//        ],
-//        'withdrawal_private_custom_currency' => [
-//            'extends' => 'withdrawal_private',
-//            'requirements' => [
-//                'currency_code' => ['!=', function (Container $c) {
-//                    return $c->get('currency_default_code');
-//                }]
-//            ]
-//        ]
-//    ]
 ];
