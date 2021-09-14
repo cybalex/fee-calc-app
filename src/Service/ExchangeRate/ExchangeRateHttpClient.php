@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace FeeCalcApp\Service\ExchangeRate;
 
-use FeeCalcApp\DTO\Currency;
+use FeeCalcApp\Config\CurrencyConfig;
 use FeeCalcApp\Exception\BadResponseException;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
@@ -67,15 +67,15 @@ class ExchangeRateHttpClient implements ExchangeRateClientInterface
 
         if (
             !isset(
-                $responseData['quotes'][Currency::USD_CODE.$currency1],
-                $responseData['quotes'][Currency::USD_CODE.$currency2]
+                $responseData['quotes'][CurrencyConfig::USD_CODE.$currency1],
+                $responseData['quotes'][CurrencyConfig::USD_CODE.$currency2]
             )
         ) {
             throw new \RuntimeException('Invalid response format was provided from currency API: '.$response);
         }
 
-        $currencySourceToUSD = (float) $responseData['quotes'][Currency::USD_CODE.$currency1];
-        $currencyDestinationToUSD = (float) $responseData['quotes'][Currency::USD_CODE.$currency2];
+        $currencySourceToUSD = (float) $responseData['quotes'][CurrencyConfig::USD_CODE.$currency1];
+        $currencyDestinationToUSD = (float) $responseData['quotes'][CurrencyConfig::USD_CODE.$currency2];
 
         return $currencyDestinationToUSD / $currencySourceToUSD;
     }

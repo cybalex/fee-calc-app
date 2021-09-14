@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace FeeCalcApp\Command;
 
-use FeeCalcApp\Exception\TransactionException;
+use FeeCalcApp\Config\CurrencyConfig;
 use FeeCalcApp\Service\Reader\FileReaderInterface;
-use FeeCalcApp\Service\TransactionBuilder;
-use FeeCalcApp\Service\TransactionProcessor;
+use FeeCalcApp\Service\TransactionHandler;
+use FeeCalcApp\Service\TransactionHistoryManager;
+use FeeCalcApp\Service\TransactionRequest;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use Symfony\Component\Console\Command\Command;
@@ -22,21 +23,23 @@ class CalculateFeeCommand extends Command
 
     private FileReaderInterface $fileReader;
 
-    private TransactionBuilder $transactionBuilder;
-
-    private TransactionProcessor $transactionProcessor;
-
     private LoggerInterface $logger;
+
+    private TransactionHandler $transactionHandler;
+    private TransactionHistoryManager $transactionHistoryManager;
+    private CurrencyConfig $currencyConfig;
 
     public function __construct(
         FileReaderInterface $fileReader,
-        TransactionBuilder $transactionBuilder,
-        TransactionProcessor $transactionProcessor
+        TransactionHandler $transactionHandler,
+        TransactionHistoryManager $transactionHistoryManager,
+        CurrencyConfig $currencyConfig
     ) {
         parent::__construct(static::$defaultName);
         $this->fileReader = $fileReader;
-        $this->transactionBuilder = $transactionBuilder;
-        $this->transactionProcessor = $transactionProcessor;
+        $this->transactionHandler = $transactionHandler;
+        $this->transactionHistoryManager = $transactionHistoryManager;
+        $this->currencyConfig = $currencyConfig;
         $this->logger = new NullLogger();
     }
 
@@ -55,24 +58,30 @@ class CalculateFeeCommand extends Command
             $transactionsData = $this->fileReader->read($filePath);
 
             foreach ($transactionsData as $transactionData) {
-                $transaction = $this->transactionBuilder
-                    ->setUserId((int) $transactionData[1])
+                $transactionRequest = new TransactionRequest();
+                $transactionRequest
+                    ->setUserId($transactionData[1])
                     ->setClientType($transactionData[2])
                     ->setDate($transactionData[0])
                     ->setOperationType($transactionData[3])
-                    ->setCurrencyAmount($transactionData[4], $transactionData[5])
-                    ->build();
+                    ->setCurrencyCode($transactionData[5])
+                    ->setAmount($transactionData[4]);
 
-                $processedTransaction = $this->transactionProcessor->process($transaction);
+                $this->transactionHandler->addTransaction($transactionRequest);
+            }
 
-                $scale = $processedTransaction->getCurrency()->getScale();
+            $this->transactionHandler->handle();
+
+            foreach ($this->transactionHandler->getOriginalTransactionOrder() as $transactionKey) {
+                $processedTransaction = $this->transactionHistoryManager->get($transactionKey);
+                $scale = $this->currencyConfig->getCurrencyScale($processedTransaction->getCurrencyCode());
                 $fee = (float) $processedTransaction->getFee() / (pow(10, $scale));
                 $output->write(number_format($fee, $scale, '.', ''), true);
             }
-        } catch (TransactionException $e) {
-            $this->logger->warning($e->getMessage());
         } catch (Throwable $e) {
-            $this->logger->critical($e->getMessage());
+            $this->logger->critical(
+                $e->getMessage().' thrown in '.$e->getFile().' on line '.$e->getLine()
+            );
 
             return 1;
         }

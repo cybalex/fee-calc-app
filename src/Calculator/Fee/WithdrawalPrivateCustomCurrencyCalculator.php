@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace FeeCalcApp\Calculator\Fee;
 
-use FeeCalcApp\DTO\Currency;
+use FeeCalcApp\Config\CurrencyConfig;
 use FeeCalcApp\DTO\TransactionDto;
 use FeeCalcApp\Service\ExchangeRate\ExchangeRateClientInterface;
 use FeeCalcApp\Service\Math;
@@ -20,7 +20,7 @@ class WithdrawalPrivateCustomCurrencyCalculator extends WithdrawalPrivateCalcula
         float $withdrawalFeeRate,
         int $maxWeeklyDiscountsNumber,
         ExchangeRateClientInterface $exchangeRateClient,
-        string $defaultCurrencyCode,
+        CurrencyConfig $currencyConfig,
         int $freeWithdrawalWeeklyAmount
     ) {
         parent::__construct(
@@ -28,7 +28,7 @@ class WithdrawalPrivateCustomCurrencyCalculator extends WithdrawalPrivateCalcula
             $transactionHistoryManager,
             $withdrawalFeeRate,
             $maxWeeklyDiscountsNumber,
-            $defaultCurrencyCode,
+            $currencyConfig,
             $freeWithdrawalWeeklyAmount
         );
         $this->exchangeRateClient = $exchangeRateClient;
@@ -39,7 +39,7 @@ class WithdrawalPrivateCustomCurrencyCalculator extends WithdrawalPrivateCalcula
         if (
             !($transactionDto->getClientType() === TransactionDto::CLIENT_TYPE_PRIVATE
                 && $transactionDto->getOperationType() === TransactionDto::OPERATION_TYPE_WITHDRAW
-                && $transactionDto->getCurrency()->getCode() !== $this->defaultCurrencyCode)
+                && $transactionDto->getCurrencyCode() !== $this->currencyConfig->getDefaultCurrencyCode())
         ) {
             return false;
         }
@@ -54,16 +54,21 @@ class WithdrawalPrivateCustomCurrencyCalculator extends WithdrawalPrivateCalcula
         string $totalAmountWithdrawalsForAWeek
     ): string {
         $discountInDefaultCurrency = parent::getDiscountInTransactionCurrency($transactionDto, $totalAmountWithdrawalsForAWeek);
+        $transactionCurrencyCode = $transactionDto->getCurrencyCode();
 
         return $this->math->div(
                 $this->math->mul(
                     $discountInDefaultCurrency,
                     (string) $this->exchangeRateClient->getExchangeRateForDate(
                         $transactionDto->getDate(),
-                        $this->defaultCurrencyCode,
-                        $transactionDto->getCurrency()->getCode()
+                        $this->currencyConfig->getDefaultCurrencyCode(),
+                        $transactionDto->getCurrencyCode()
                     )),
-                (string) pow(10, Currency::DEFAULT_SCALE - $transactionDto->getCurrency()->getScale())
+                (string) pow(
+                    10,
+                    $this->currencyConfig->getCurrencyDefaultScale()
+                    - $this->currencyConfig->getCurrencyScale($transactionCurrencyCode)
+                )
             )
         ;
     }

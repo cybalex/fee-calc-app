@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 namespace FeeCalcApp\Unit\Calculator\Fee;
 
+use DateTime;
 use FeeCalcApp\Calculator\Fee\WithdrawalPrivateCalculator;
-use FeeCalcApp\DTO\Currency;
+use FeeCalcApp\Config\CurrencyConfig;
 use FeeCalcApp\DTO\TransactionDto;
 use FeeCalcApp\Service\Math;
 use FeeCalcApp\Service\TransactionHistoryManager;
@@ -35,18 +36,24 @@ class WithdrawalPrivateCalculatorTest extends TestCase
 
     private array $constructorArgs;
 
+    /**
+     * @var CurrencyConfig|MockObject
+     */
+    private $currencyConfig;
+
 
     public function setUp()
     {
         $this->transactionHistoryManager = $this->createMock(TransactionHistoryManager::class);
         $this->math = $this->createMock(Math::class);
+        $this->currencyConfig = $this->createMock(CurrencyConfig::class);
 
         $this->constructorArgs = [
             $this->math,
             $this->transactionHistoryManager,
             self::WITHDRAWAL_FEE_RATE,
             self::FREE_WITHDRAWALS_WEEKLY,
-            self::DEFAULT_CURRENCY_CODE,
+            $this->currencyConfig,
             self::FREE_WITHDRAWAL_WEEKLY_AMOUNT,
         ];
 
@@ -58,14 +65,21 @@ class WithdrawalPrivateCalculatorTest extends TestCase
      */
     public function testIsApplicable(
         TransactionDto $transactionDto,
-        bool $transactionHistoryManagerCalled,
-        int $countPrevOperations,
-        bool $expectedResult
+        bool           $transactionHistoryManagerCalled,
+        int            $countPrevOperations,
+        bool           $getDefaultCurrencyCode,
+        bool           $expectedResult
     ): void {
         $this->transactionHistoryManager->expects($transactionHistoryManagerCalled ? $this->once() : $this->never())
             ->method('getUserTransactionsWithinAWeek')->willReturn(
                 array_fill(0, $countPrevOperations, $this->createMock(TransactionDto::class))
             );
+
+        $this->currencyConfig
+            ->expects($getDefaultCurrencyCode ? $this->once() : $this->never())
+            ->method('getDefaultCurrencyCode')
+            ->willReturn(self::DEFAULT_CURRENCY_CODE)
+        ;
 
         $this->assertEquals($expectedResult, $this->calculator->isApplicable($transactionDto));
     }
@@ -97,6 +111,10 @@ class WithdrawalPrivateCalculatorTest extends TestCase
         $this->math->expects($this->once())->method('sub')->with('10.50', $discount)
             ->willReturn('9.50');
 
+        $this->currencyConfig
+            ->expects($this->never())
+            ->method('getDefaultCurrencyCode');
+
         $this->assertEquals('9.50', $calculator->calculate($transactionDto));
     }
 
@@ -125,6 +143,11 @@ class WithdrawalPrivateCalculatorTest extends TestCase
         $this->math->expects($this->once())->method('min')->with('1.00', $maxFeeInCurrency)->willReturn('1.00');
         $this->math->expects($this->once())->method('floor')->with('1.00')->willReturn('1');
 
+        $this->currencyConfig
+            ->expects($this->exactly(2))
+            ->method('getDefaultCurrencyCode')
+            ->willReturn(self::DEFAULT_CURRENCY_CODE);
+
         $this->assertTrue($this->calculator->isApplicable($transactionDto));
         $this->assertEquals('1', $this->calculator->calculateDiscount($transactionDto, $maxFeeInCurrency));
     }
@@ -136,12 +159,13 @@ class WithdrawalPrivateCalculatorTest extends TestCase
                 self::USER_ID,
                 TransactionDto::CLIENT_TYPE_PRIVATE,
                 new \DateTime('2016-01-05'),
-                $this->getCurrency(),
+                self::DEFAULT_CURRENCY_CODE,
                 300,
                 TransactionDto::OPERATION_TYPE_DEPOSIT
             ),
             false,
             2,
+            false,
             false
         ];
 
@@ -150,12 +174,13 @@ class WithdrawalPrivateCalculatorTest extends TestCase
                 self::USER_ID,
                 TransactionDto::CLIENT_TYPE_BUSINESS,
                 new \DateTime('2016-01-05'),
-                $this->getCurrency(),
+                self::DEFAULT_CURRENCY_CODE,
                 1300,
                 TransactionDto::OPERATION_TYPE_WITHDRAW
             ),
             false,
             2,
+            false,
             false,
         ];
 
@@ -163,19 +188,22 @@ class WithdrawalPrivateCalculatorTest extends TestCase
             $this->getApplicableTransaction(13000),
             true,
             3,
+            true,
             false,
         ];
 
         yield [
-            $this->getApplicableTransaction(13000, Currency::JPY_CODE),
+            $this->getApplicableTransaction(13000, CurrencyConfig::JPY_CODE),
             false,
             2,
+            true,
             false,
         ];
         yield [
             $this->getApplicableTransaction(13000),
             true,
             2,
+            true,
             true,
         ];
     }
@@ -187,15 +215,10 @@ class WithdrawalPrivateCalculatorTest extends TestCase
         return new TransactionDto(
             self::USER_ID,
             TransactionDto::CLIENT_TYPE_PRIVATE,
-            new \DateTime('2016-01-05'),
-            $this->getCurrency($currencyCode ?? self::DEFAULT_CURRENCY_CODE),
+            new DateTime('2016-01-05'),
+            $currencyCode ?? self::DEFAULT_CURRENCY_CODE,
             $amount,
             TransactionDto::OPERATION_TYPE_WITHDRAW
         );
-    }
-
-    private function getCurrency(string $currencyCode = self::DEFAULT_CURRENCY_CODE): Currency
-    {
-        return new Currency($currencyCode);
     }
 }

@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace FeeCalcApp\DTO;
 
-abstract class Transaction
+use DateTime;
+
+abstract class AbstractTransaction implements TransactionInterface
 {
     protected string $id;
 
@@ -12,13 +14,13 @@ abstract class Transaction
 
     protected string $clientType;
 
-    protected \DateTime $date;
-
-    protected Currency $currency;
+    protected DateTime $date;
 
     protected int $amount;
 
     protected string $operationType;
+
+    protected string $currencyCode;
 
     public function getId(): string
     {
@@ -35,14 +37,14 @@ abstract class Transaction
         return $this->clientType;
     }
 
-    public function getDate(): \DateTime
+    public function getDate(): DateTime
     {
         return $this->date;
     }
 
-    public function getCurrency(): Currency
+    public function getCurrencyCode(): string
     {
-        return $this->currency;
+        return $this->currencyCode;
     }
 
     public function getAmount(): int

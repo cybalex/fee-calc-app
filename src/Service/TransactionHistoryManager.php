@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace FeeCalcApp\Service;
 
-use FeeCalcApp\DTO\Currency;
+use FeeCalcApp\Config\CurrencyConfig;
+use FeeCalcApp\DTO\ProcessedTransactionDto;
 use FeeCalcApp\DTO\TransactionDto;
 use FeeCalcApp\Helper\DatetimeHelper;
 use FeeCalcApp\Service\ExchangeRate\ExchangeRateClientInterface;
@@ -19,30 +20,43 @@ class TransactionHistoryManager
     private DatetimeHelper $dateTimeHelper;
 
     private Math $math;
+    private CurrencyConfig $currencyConfig;
 
     public function __construct(
         ExchangeRateClientInterface $exchangeRateClient,
         TransactionStorageInterface $transactionStorageInterface,
         DatetimeHelper $dateTimeHelper,
-        Math $math
+        Math $math,
+        CurrencyConfig $currencyConfig
     ) {
         $this->exchangeRateClient = $exchangeRateClient;
         $this->transactionStorage = $transactionStorageInterface;
         $this->dateTimeHelper = $dateTimeHelper;
         $this->math = $math;
+        $this->currencyConfig = $currencyConfig;
     }
 
-    public function add(TransactionDto $transactionDto): self
+    public function add(ProcessedTransactionDto $processedTransactionDto): self
     {
-        $this->transactionStorage->add($transactionDto);
+        $this->transactionStorage->add($processedTransactionDto);
 
         return $this;
+    }
+
+    public function get(string $key): ?ProcessedTransactionDto
+    {
+        return $this->transactionStorage->get($key);
+    }
+
+    public function getAll()
+    {
+        return $this->transactionStorage->getAll();
     }
 
     public function getUserTransactionsWithinAWeek(TransactionDto $transactionDto): array
     {
         return array_filter(
-            $this->transactionStorage->getAll(), function (TransactionDto $transactionFromHistory) use ($transactionDto) {
+            $this->transactionStorage->getAll(), function (ProcessedTransactionDto $transactionFromHistory) use ($transactionDto) {
                 return $this->dateTimeHelper->datesAreWithinSameWeek($transactionDto->getDate(), $transactionFromHistory->getDate())
                         && $transactionDto->getUserId() === $transactionFromHistory->getUserId()
                         && $transactionDto->getOperationType() === $transactionFromHistory->getOperationType()
@@ -60,7 +74,7 @@ class TransactionHistoryManager
         $totalAmount = '0';
 
         foreach ($transactions as $transaction) {
-            $transactionCurrencyCode = $transaction->getCurrency()->getCode();
+            $transactionCurrencyCode = $transaction->getCurrencyCode();
 
             $transactionAmount = $transactionCurrencyCode === $inCurrency
                 ? (string) $transaction->getAmount()
@@ -73,7 +87,11 @@ class TransactionHistoryManager
                             $transactionCurrencyCode
                         )
                     ),
-                    (string) pow(10, Currency::DEFAULT_SCALE - $transaction->getCurrency()->getScale())
+                    (string) pow(
+                        10,
+                        $this->currencyConfig->getCurrencyDefaultScale()
+                        - $this->currencyConfig->getCurrencyScale($transactionCurrencyCode)
+                    )
                 )
             ;
             $totalAmount = $this->math->add($totalAmount, $transactionAmount);
