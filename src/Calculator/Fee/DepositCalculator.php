@@ -4,11 +4,10 @@ declare(strict_types=1);
 
 namespace FeeCalcApp\Calculator\Fee;
 
-use FeeCalcApp\Calculator\FeeCalculatorInterface;
 use FeeCalcApp\Dto\TransactionDto;
 use FeeCalcApp\Service\Math;
 
-class DepositCalculator implements FeeCalculatorInterface
+class DepositCalculator extends AbstractCalculator
 {
     private float $feeRate;
     private Math $math;
@@ -22,10 +21,5 @@ class DepositCalculator implements FeeCalculatorInterface
     public function calculate(TransactionDto $transactionDto): string
     {
         return $this->math->mul((string) $transactionDto->getAmount(), (string) $this->feeRate);
-    }
-
-    public function isApplicable(TransactionDto $transactionDto): bool
-    {
-        return $transactionDto->getOperationType() === TransactionDto::OPERATION_TYPE_DEPOSIT;
     }
 }

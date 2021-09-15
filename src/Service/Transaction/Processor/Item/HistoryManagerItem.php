@@ -22,9 +22,11 @@ class HistoryManagerItem implements TransactionProcessorItemInterface
         $this->transactionHistoryManager = $transactionHistoryManager;
     }
 
-    public function process(TransactionDto $transactionDto, TransactionContext $context): void
+    public function process(TransactionDto $transactionDto, TransactionContext $context): bool
     {
         $this->transactionHistoryManager->add($context->getCurrentProcessedTransaction());
+
+        return true;
     }
 
     public function getPriority(): int

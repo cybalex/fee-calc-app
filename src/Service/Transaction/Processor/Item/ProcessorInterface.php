@@ -9,5 +9,5 @@ use FeeCalcApp\Service\Transaction\TransactionContext;
 
 interface ProcessorInterface
 {
-    public function process(TransactionDto $transactionDto, TransactionContext $context): void;
+    public function process(TransactionDto $transactionDto, TransactionContext $context): bool;
 }

@@ -1,11 +1,16 @@
 <?php
 
 use DI\Container;
+use FeeCalcApp\Calculator\CalculatorCompiler;
+use FeeCalcApp\Calculator\Config\ConfigBuilder;
+use FeeCalcApp\Calculator\Config\ConfigBuilderInterface;
+use FeeCalcApp\Calculator\Config\FilterProvider;
 use FeeCalcApp\Calculator\Fee\DepositCalculator;
 use FeeCalcApp\Calculator\Fee\WithdrawalBusinessCalculator;
 use FeeCalcApp\Calculator\Fee\WithdrawalPrivateCalculator;
 use FeeCalcApp\Calculator\Fee\WithdrawalPrivateCustomCurrencyCalculator;
 use FeeCalcApp\Calculator\Fee\WithdrawalPrivateNoDiscountCalculator;
+use FeeCalcApp\Calculator\Filter\FilterCreator;
 use FeeCalcApp\Command\CalculateFeeCommand;
 use FeeCalcApp\Config\CurrencyConfig;
 use FeeCalcApp\Helper\DatetimeHelper;
@@ -34,9 +39,11 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\Validator\ValidatorBuilder;
 
 $parameters = require(__DIR__ . '/parameters.php');
+$feeCalculatorConfig = require(__DIR__ . '/fee_calculators_config.php');
 
 return array_merge(
     $parameters,
+    $feeCalculatorConfig,
     [
         TransactionStorageInterface::class => DI\create(InMemoryTransactionStorage::class),
         FileReaderInterface::class => DI\create(CsvFileReader::class),
@@ -57,15 +64,19 @@ return array_merge(
         },
 
         DepositCalculator::class => function (Container $c) {
-            return new DepositCalculator($c->get(Math::class), $c->get('deposit_fee_rate'));
+            $calculator = new DepositCalculator($c->get(Math::class), $c->get('deposit_fee_rate'));
+
+            return $c->get(CalculatorCompiler::class)->compileFilters($calculator);
         },
 
         WithdrawalBusinessCalculator::class => function (Container $c) {
-            return new WithdrawalBusinessCalculator($c->get(Math::class), $c->get('withdrawal_business_fee_rate'));
+            $calculator = new WithdrawalBusinessCalculator($c->get(Math::class), $c->get('withdrawal_business_fee_rate'));
+
+            return $c->get(CalculatorCompiler::class)->compileFilters($calculator);
         },
 
         WithdrawalPrivateCalculator::class => function(Container $c) {
-            return new WithdrawalPrivateCalculator(
+            $calculator = new WithdrawalPrivateCalculator(
                 $c->get(Math::class),
                 $c->get(TransactionHistoryManager::class),
                 $c->get('withdrawal_private_fee_rate'),
@@ -73,9 +84,11 @@ return array_merge(
                 $c->get(CurrencyConfig::class),
                 $c->get('private_withdrawal_free_weekly_amount'),
             );
+
+            return $c->get(CalculatorCompiler::class)->compileFilters($calculator);
         },
         WithdrawalPrivateCustomCurrencyCalculator::class => function(Container $c) {
-            return new WithdrawalPrivateCustomCurrencyCalculator(
+            $calculator =  new WithdrawalPrivateCustomCurrencyCalculator(
                 $c->get(Math::class),
                 $c->get(TransactionHistoryManager::class),
                 $c->get('withdrawal_private_fee_rate'),
@@ -84,14 +97,18 @@ return array_merge(
                 $c->get(CurrencyConfig::class),
                 $c->get('private_withdrawal_free_weekly_amount'),
             );
+
+            return $c->get(CalculatorCompiler::class)->compileFilters($calculator);
         },
         WithdrawalPrivateNoDiscountCalculator::class => function (Container $c) {
-            return new WithdrawalPrivateNoDiscountCalculator(
+            $calculator =  new WithdrawalPrivateNoDiscountCalculator(
                 $c->get(Math::class),
                 $c->get(TransactionHistoryManager::class),
                 $c->get('withdrawal_private_fee_rate'),
                 $c->get('private_withdrawal_max_weekly_discounts_number')
             );
+
+            return $c->get(CalculatorCompiler::class)->compileFilters($calculator);
         },
         FeeCalculatorCollection::class => function (Container $c) {
             return (new FeeCalculatorCollection())
@@ -193,6 +210,21 @@ return array_merge(
                 $c->get(Math::class),
                 $c->get(CurrencyConfig::class)
             );
-        }
+        },
+        ConfigBuilder::class => function (Container $c) {
+            return new ConfigBuilder($c->get('fee_calculation_config'));
+        },
+        CalculatorCompiler::class => function (Container $c) {
+            return new CalculatorCompiler($c->get(FilterProvider::class), $c->get(ConfigBuilder::class));
+        },
+        FilterProvider::class => function (Container $c) {
+          return new FilterProvider(
+              $c->get(ConfigBuilderInterface::class),
+              $c->get(FilterCreator::class)
+          );
+        },
+        ConfigBuilderInterface::class => function (Container $c) {
+            return new ConfigBuilder($c->get('fee_calculation_config'));
+        },
     ]
 );

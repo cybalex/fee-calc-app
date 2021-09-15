@@ -5,15 +5,14 @@ declare(strict_types=1);
 namespace FeeCalcApp\Calculator\Fee;
 
 use FeeCalcApp\Calculator\FeeDiscountCalculatorInterface;
+use FeeCalcApp\Calculator\Filter\FilterInterface;
 use FeeCalcApp\Config\CurrencyConfig;
 use FeeCalcApp\Dto\TransactionDto;
 use FeeCalcApp\Service\Math;
 use FeeCalcApp\Service\TransactionHistoryManager;
 
-class WithdrawalPrivateCalculator extends WithdrawalPrivateNoDiscountCalculator implements FeeDiscountCalculatorInterface
+class WithdrawalPrivateCalculator extends WithdrawalPrivateNoDiscountCalculator implements FeeDiscountCalculatorInterface, FilterInterface
 {
-    protected ?array $transactionsWithinAWeek = null;
-
     protected CurrencyConfig $currencyConfig;
 
     protected int $freeWithdrawalWeeklyAmount;
@@ -39,25 +38,12 @@ class WithdrawalPrivateCalculator extends WithdrawalPrivateNoDiscountCalculator 
         return $this->math->sub($maxFeeInCurrency, $this->calculateDiscount($transactionDto, $maxFeeInCurrency));
     }
 
-    public function isApplicable(TransactionDto $transactionDto): bool
-    {
-        if (
-            !($transactionDto->getClientType() === TransactionDto::CLIENT_TYPE_PRIVATE
-            && $transactionDto->getOperationType() === TransactionDto::OPERATION_TYPE_WITHDRAW
-            && $transactionDto->getCurrencyCode() === $this->currencyConfig->getDefaultCurrencyCode())
-        ) {
-            return false;
-        }
-
-        $this->transactionsWithinAWeek = $this->transactionHistoryManager->getUserTransactionsWithinAWeek($transactionDto);
-
-        return count($this->transactionsWithinAWeek) < $this->maxWeeklyDiscountsNumber;
-    }
-
     public function calculateDiscount(TransactionDto $transactionDto, string $maxFeeInCurrency): string
     {
+        $transactionsWithinAWeek = $this->transactionHistoryManager->getUserTransactionsWithinAWeek($transactionDto);
+
         $totalAmountWithdrawalsForAWeek = $this->transactionHistoryManager
-            ->getUserTransactionsTotalAmount($this->transactionsWithinAWeek, $this->currencyConfig->getDefaultCurrencyCode());
+            ->getUserTransactionsTotalAmount($transactionsWithinAWeek, $this->currencyConfig->getDefaultCurrencyCode());
 
         $maxDiscountInTransactionCurrency = $this->getDiscountInTransactionCurrency($transactionDto, $totalAmountWithdrawalsForAWeek);
 

@@ -69,7 +69,7 @@ class TransactionHistoryManager
     /**
      * @param TransactionDto[] $transactions
      */
-    public function getUserTransactionsTotalAmount(?array $transactions, string $inCurrency): string
+    public function getUserTransactionsTotalAmount(array $transactions, string $inCurrency): string
     {
         $totalAmount = '0';
 

@@ -28,11 +28,15 @@ class TransactionProcessor implements ProcessorInterface
         );
     }
 
-    public function process(TransactionDto $transactionDto, TransactionContext $context): void
+    public function process(TransactionDto $transactionDto, TransactionContext $context): bool
     {
         foreach ($this->processors as $processor) {
-            $processor->process($transactionDto, $context);
+            if (!$processor->process($transactionDto, $context)) {
+                return false;
+            }
         }
+
+        return true;
     }
 
     private function addProcessor(ProcessorItem $processorItem): void

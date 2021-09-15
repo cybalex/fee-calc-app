@@ -34,21 +34,6 @@ class WithdrawalPrivateCustomCurrencyCalculator extends WithdrawalPrivateCalcula
         $this->exchangeRateClient = $exchangeRateClient;
     }
 
-    public function isApplicable(TransactionDto $transactionDto): bool
-    {
-        if (
-            !($transactionDto->getClientType() === TransactionDto::CLIENT_TYPE_PRIVATE
-                && $transactionDto->getOperationType() === TransactionDto::OPERATION_TYPE_WITHDRAW
-                && $transactionDto->getCurrencyCode() !== $this->currencyConfig->getDefaultCurrencyCode())
-        ) {
-            return false;
-        }
-
-        $this->transactionsWithinAWeek = $this->transactionHistoryManager->getUserTransactionsWithinAWeek($transactionDto);
-
-        return count($this->transactionsWithinAWeek) < $this->maxWeeklyDiscountsNumber;
-    }
-
     protected function getDiscountInTransactionCurrency(
         TransactionDto $transactionDto,
         string $totalAmountWithdrawalsForAWeek

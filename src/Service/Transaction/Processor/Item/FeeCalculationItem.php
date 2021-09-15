@@ -25,18 +25,22 @@ class FeeCalculationItem implements TransactionProcessorItemInterface
         $this->priority = $priority;
     }
 
-    public function process(TransactionDto $transactionDto, TransactionContext $context): void
+    public function process(TransactionDto $transactionDto, TransactionContext $context): bool
     {
+        $isApplicable = false;
         foreach ($this->feeCalculators as $feeCalculator) {
             if (!$feeCalculator->isApplicable($transactionDto)) {
                 continue;
             }
 
+            $isApplicable = true;
             $feeAmount = $feeCalculator->calculate($transactionDto);
             $context->setCurrentProcessedTransaction(
                 new ProcessedTransactionDto($transactionDto, $feeAmount)
             );
         }
+
+        return $isApplicable;
     }
 
     public function getPriority(): int
