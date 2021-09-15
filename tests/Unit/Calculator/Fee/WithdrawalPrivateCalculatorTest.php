@@ -60,31 +60,6 @@ class WithdrawalPrivateCalculatorTest extends TestCase
         $this->calculator = new WithdrawalPrivateCalculator(...$this->constructorArgs);
     }
 
-    /**
-     * @dataProvider transactionDtoProvider
-     */
-    public function testIsApplicable(
-        TransactionDto $transactionDto,
-        bool           $transactionHistoryManagerCalled,
-        int            $countPrevOperations,
-        bool           $getDefaultCurrencyCode,
-        bool           $expectedResult
-    ): void {
-        $this->markTestSkipped();
-        $this->transactionHistoryManager->expects($transactionHistoryManagerCalled ? $this->once() : $this->never())
-            ->method('getUserTransactionsWithinAWeek')->willReturn(
-                array_fill(0, $countPrevOperations, $this->createMock(TransactionDto::class))
-            );
-
-        $this->currencyConfig
-            ->expects($getDefaultCurrencyCode ? $this->once() : $this->never())
-            ->method('getDefaultCurrencyCode')
-            ->willReturn(self::DEFAULT_CURRENCY_CODE)
-        ;
-
-        $this->assertEquals($expectedResult, $this->calculator->isApplicable($transactionDto));
-    }
-
     public function testCalculate(): void
     {$this->markTestSkipped();
         $amount = 1300;
@@ -120,7 +95,7 @@ class WithdrawalPrivateCalculatorTest extends TestCase
     }
 
     public function testCalculateDiscountSameCurrency(): void
-    {$this->markTestSkipped();
+    {
         $amount = 1100;
         $maxFeeInCurrency = '10.00';
         $transactionDto = $this->getApplicableTransaction($amount);
@@ -145,79 +120,20 @@ class WithdrawalPrivateCalculatorTest extends TestCase
         $this->math->expects($this->once())->method('floor')->with('1.00')->willReturn('1');
 
         $this->currencyConfig
-            ->expects($this->exactly(2))
+            ->expects($this->once())
             ->method('getDefaultCurrencyCode')
             ->willReturn(self::DEFAULT_CURRENCY_CODE);
 
-        $this->assertTrue($this->calculator->isApplicable($transactionDto));
         $this->assertEquals('1', $this->calculator->calculateDiscount($transactionDto, $maxFeeInCurrency));
     }
 
-    public function transactionDtoProvider(): \Generator
+    private function getApplicableTransaction(int $amount): TransactionDto
     {
-        yield [
-            new TransactionDto(
-                self::USER_ID,
-                TransactionDto::CLIENT_TYPE_PRIVATE,
-                new \DateTime('2016-01-05'),
-                self::DEFAULT_CURRENCY_CODE,
-                300,
-                TransactionDto::OPERATION_TYPE_DEPOSIT
-            ),
-            false,
-            2,
-            false,
-            false
-        ];
-
-        yield [
-            new TransactionDto(
-                self::USER_ID,
-                TransactionDto::CLIENT_TYPE_BUSINESS,
-                new \DateTime('2016-01-05'),
-                self::DEFAULT_CURRENCY_CODE,
-                1300,
-                TransactionDto::OPERATION_TYPE_WITHDRAW
-            ),
-            false,
-            2,
-            false,
-            false,
-        ];
-
-        yield [
-            $this->getApplicableTransaction(13000),
-            true,
-            3,
-            true,
-            false,
-        ];
-
-        yield [
-            $this->getApplicableTransaction(13000, CurrencyConfig::JPY_CODE),
-            false,
-            2,
-            true,
-            false,
-        ];
-        yield [
-            $this->getApplicableTransaction(13000),
-            true,
-            2,
-            true,
-            true,
-        ];
-    }
-
-    private function getApplicableTransaction(
-        int $amount,
-        ?string $currencyCode = null
-    ): TransactionDto {
         return new TransactionDto(
             self::USER_ID,
             TransactionDto::CLIENT_TYPE_PRIVATE,
             new DateTime('2016-01-05'),
-            $currencyCode ?? self::DEFAULT_CURRENCY_CODE,
+            self::DEFAULT_CURRENCY_CODE,
             $amount,
             TransactionDto::OPERATION_TYPE_WITHDRAW
         );

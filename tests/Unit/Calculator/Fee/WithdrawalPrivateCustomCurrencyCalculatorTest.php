@@ -65,39 +65,12 @@ class WithdrawalPrivateCustomCurrencyCalculatorTest extends TestCase
         );
     }
 
-    /**
-     * @dataProvider transactionDtoProvider
-     */
-    public function testIsApplicable(
-        TransactionDto $transactionDto,
-        bool           $transactionHistoryManagerCalled,
-        int            $countPrevOperations,
-        bool           $getDefaultCurrency,
-        bool           $expectedResult
-    ): void {
-        $this->markTestSkipped();
-        $this->transactionHistoryManager->expects($transactionHistoryManagerCalled ? $this->once() : $this->never())
-            ->method('getUserTransactionsWithinAWeek')->willReturn(
-                array_fill(0, $countPrevOperations, $this->createMock(TransactionDto::class))
-            );
-
-        $this->currencyConfig
-            ->expects($getDefaultCurrency ? $this->once() : $this->never())
-            ->method('getDefaultCurrencyCode')
-            ->with()
-            ->willReturn(self::DEFAULT_CURRENCY_CODE)
-        ;
-
-        $this->assertEquals($expectedResult, $this->calculator->isApplicable($transactionDto));
-    }
-
     public function testCalculateDiscountDifferentCurrencies(): void
-    {$this->markTestSkipped();
+    {
         $transactionCurrencyCode = CurrencyConfig::EUR_CODE;
         $transactionDto = $this->getApplicableTransaction(1500, CurrencyConfig::EUR_CODE);
-
         $this->transactionHistoryManager->expects($this->once())->method('getUserTransactionsTotalAmount')
-            ->with(null, self::DEFAULT_CURRENCY_CODE)->willReturn('0');
+            ->with([], self::DEFAULT_CURRENCY_CODE)->willReturn('0');
 
         $this->math->expects($this->once())->method('sub')->with('1000', '0')->willReturn('1000');
         $this->math->expects($this->once())->method('max')->with('1000', '0')->willReturn('1000.00');
@@ -124,62 +97,6 @@ class WithdrawalPrivateCustomCurrencyCalculatorTest extends TestCase
             ->willReturn(0);
 
         $this->assertEquals('12', $this->calculator->calculateDiscount($transactionDto, '1000'));
-    }
-
-    public function transactionDtoProvider(): \Generator
-    {
-        yield [
-            new TransactionDto(
-                self::USER_ID,
-                TransactionDto::CLIENT_TYPE_PRIVATE,
-                new \DateTime('2016-01-05'),
-                self::DEFAULT_CURRENCY_CODE,
-                300,
-                TransactionDto::OPERATION_TYPE_DEPOSIT
-            ),
-            false,
-            2,
-            false,
-            false
-        ];
-
-        yield [
-            new TransactionDto(
-                self::USER_ID,
-                TransactionDto::CLIENT_TYPE_BUSINESS,
-                new \DateTime('2016-01-05'),
-                self::DEFAULT_CURRENCY_CODE,
-                1300,
-                TransactionDto::OPERATION_TYPE_WITHDRAW
-            ),
-            false,
-            2,
-            false,
-            false,
-        ];
-
-        yield [
-            $this->getApplicableTransaction(13000),
-            false,
-            3,
-            true,
-            false,
-        ];
-
-        yield [
-            $this->getApplicableTransaction(13000, CurrencyConfig::JPY_CODE),
-            true,
-            2,
-            true,
-            true,
-        ];
-        yield [
-            $this->getApplicableTransaction(13000),
-            false,
-            2,
-            true,
-            false,
-        ];
     }
 
     private function getApplicableTransaction(
