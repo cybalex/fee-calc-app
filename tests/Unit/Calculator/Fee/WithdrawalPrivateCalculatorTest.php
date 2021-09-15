@@ -61,7 +61,7 @@ class WithdrawalPrivateCalculatorTest extends TestCase
     }
 
     public function testCalculate(): void
-    {$this->markTestSkipped();
+    {
         $amount = 1300;
         $discount = '1.00';
         $transactionDto = $this->getApplicableTransaction($amount);

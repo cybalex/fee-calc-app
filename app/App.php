@@ -7,10 +7,11 @@ use DI\ContainerBuilder;
 
 class App implements AppInterface
 {
-    public function buildContainer(): Container
+    public function buildContainer(array $definitions = []): Container
     {
         return (new ContainerBuilder())
             ->addDefinitions($this->getConfig())
+            ->addDefinitions($definitions)
             ->build();
     }
 

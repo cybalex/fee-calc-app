@@ -67,7 +67,9 @@ class TransactionHandler
 
         array_walk(
             $this->transactionCollection,
-            fn (TransactionDto $transactionDto) => $this->transactionProcessor->process($transactionDto, $transactionContext),
+            function (TransactionDto $transactionDto) use ($transactionContext) {
+                return $this->transactionProcessor->process($transactionDto, $transactionContext);
+            }
         );
     }
 

@@ -24,7 +24,9 @@ class TransactionProcessor implements ProcessorInterface
 
         usort(
             $this->processors,
-            fn (ProcessorItem $p1, ProcessorItem $p2) => $p1->getPriority() <=> $p2->getPriority()
+            function (ProcessorItem $p1, ProcessorItem $p2) {
+                return $p1->getPriority() <=> $p2->getPriority();
+            }
         );
     }
 
