@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace FeeCalcApp\Unit\Service\Config;
 
 use FeeCalcApp\Config\CurrencyConfig;
+use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 
 class CurrencyConfigTest extends TestCase
@@ -19,5 +20,8 @@ class CurrencyConfigTest extends TestCase
         );
 
         $this->assertEquals(0, $currencyConfig->getCurrencyScale('JPY'));
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Currency CHF is not supported');
+        $currencyConfig->getCurrencyScale('CHF');
     }
 }

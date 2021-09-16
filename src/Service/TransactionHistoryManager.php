@@ -48,11 +48,6 @@ class TransactionHistoryManager
         return $this->transactionStorage->get($key);
     }
 
-    public function getAll()
-    {
-        return $this->transactionStorage->getAll();
-    }
-
     public function getUserTransactionsWithinAWeek(TransactionDto $transactionDto): array
     {
         return array_filter(
