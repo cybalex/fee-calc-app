@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace FeeCalcApp\Service\ExchangeRate;
 
+use DateTime;
 use FeeCalcApp\Config\CurrencyConfig;
 use FeeCalcApp\Exception\BadResponseException;
 use Psr\Log\LoggerInterface;
@@ -15,6 +16,7 @@ class ExchangeRateHttpClient implements ExchangeRateClientInterface
 {
     private const MAX_RETRY_COUNT = 3;
     private const RETRY_INTERVAL_SEC = 1;
+    private const DATE_FORMAT = 'Y-m-d';
 
     private string $currencyApiUrl;
     private string $currencyApiKey;
@@ -32,16 +34,17 @@ class ExchangeRateHttpClient implements ExchangeRateClientInterface
     /**
      * Calculates the exchange rate $currency1 / $currency2.
      *
-     * @param \DateTime $date      exchange rate for the given day
-     * @param string    $currency1 Currency code. For example: 'USD'
-     * @param string    $currency2 Currency code. For example: 'EUR'
+     * @param DateTime $date      exchange rate for the given day
+     * @param string   $currency1 Currency code. For example: 'USD'
+     * @param string   $currency2 Currency code. For example: 'EUR'
      */
-    public function getExchangeRateForDate(\DateTime $date, string $currency1, string $currency2): float
+    public function getExchangeRateForDate(DateTime $date, string $currency1, string $currency2): float
     {
         $queryParams = [
             'access_key' => $this->currencyApiKey,
             'currencies' => implode(',', [$currency1, $currency2]),
             'format' => 1,
+            'date' => $date->format(self::DATE_FORMAT),
         ];
 
         $url = $this->currencyApiUrl.'?'.http_build_query($queryParams);

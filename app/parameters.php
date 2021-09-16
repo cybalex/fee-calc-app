@@ -24,7 +24,7 @@ return [
     'date_format' => 'Y-m-d',
 
     'logs_date_format' => 'Y-m-d H:i:s',
-    'currency_api_url' => 'http://api.currencylayer.com/live',
+    'currency_api_url' => 'http://api.currencylayer.com/historical',
     'currency_api_key' => '2623fe61c14e8d237ae2a01361603707',
 
     'deposit_fee_rate' => 0.0003,
