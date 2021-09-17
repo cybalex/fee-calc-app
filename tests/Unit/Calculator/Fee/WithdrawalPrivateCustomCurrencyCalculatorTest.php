@@ -8,7 +8,7 @@ use DateTime;
 use FeeCalcApp\Calculator\Fee\WithdrawalPrivateCustomCurrencyCalculator;
 use FeeCalcApp\Config\CurrencyConfig;
 use FeeCalcApp\DTO\TransactionDto;
-use FeeCalcApp\Service\ExchangeRate\ExchangeRateCacheProxy;
+use FeeCalcApp\Service\ExchangeRate\ExchangeRateHttpClient;
 use FeeCalcApp\Service\Math;
 use FeeCalcApp\Service\TransactionHistoryManager;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -36,9 +36,9 @@ class WithdrawalPrivateCustomCurrencyCalculatorTest extends TestCase
     private $math;
 
     /**
-     * @var ExchangeRateCacheProxy|MockObject
+     * @var ExchangeRateHttpClient|MockObject
      */
-    private $exchangeRateCacheProxy;
+    private $exchangeRateClient;
 
     /**
      * @var CurrencyConfig|MockObject
@@ -51,7 +51,7 @@ class WithdrawalPrivateCustomCurrencyCalculatorTest extends TestCase
         $this->transactionHistoryManager = $this->createMock(TransactionHistoryManager::class);
         $this->math = $this->createMock(Math::class);
 
-        $this->exchangeRateCacheProxy = $this->createMock(ExchangeRateCacheProxy::class);
+        $this->exchangeRateClient = $this->createMock(ExchangeRateHttpClient::class);
         $this->currencyConfig = $this->createMock(CurrencyConfig::class);
 
         $this->calculator = new WithdrawalPrivateCustomCurrencyCalculator(
@@ -59,7 +59,7 @@ class WithdrawalPrivateCustomCurrencyCalculatorTest extends TestCase
             $this->transactionHistoryManager,
             self::WITHDRAWAL_FEE_RATE,
             self::FREE_WITHDRAWALS_WEEKLY,
-            $this->exchangeRateCacheProxy,
+            $this->exchangeRateClient,
             $this->currencyConfig,
             self::FREE_WITHDRAWAL_WEEKLY_AMOUNT
         );
@@ -74,8 +74,8 @@ class WithdrawalPrivateCustomCurrencyCalculatorTest extends TestCase
 
         $this->math->expects($this->once())->method('sub')->with('1000', '0')->willReturn('1000');
         $this->math->expects($this->once())->method('max')->with('1000', '0')->willReturn('1000.00');
-        $this->exchangeRateCacheProxy->expects($this->once())->method('getExchangeRateForDate')
-            ->with($transactionDto->getDate(), self::DEFAULT_CURRENCY_CODE, $transactionCurrencyCode)
+        $this->exchangeRateClient->expects($this->once())->method('getExchangeRate')
+            ->with(self::DEFAULT_CURRENCY_CODE, $transactionCurrencyCode)
             ->willReturn('1.2');
         $this->math->expects($this->exactly(2))->method('mul')
             ->withConsecutive(['0.01', '1000'], ['10', '1.2'])->willReturnOnConsecutiveCalls('10', '12');

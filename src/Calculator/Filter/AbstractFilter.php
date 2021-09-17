@@ -33,7 +33,6 @@ abstract class AbstractFilter implements FilterInterface, ComparisonInterface
             case self::COMPARISON_GREATER:
                 return $value1 > $value2;
             case self::COMPARISON_LESS_THEN:
-
                 return $value1 < $value2;
             case self::COMPARISON_LESS_THEN_OR_EQUALS:
                 return $value1 <= $value2;

@@ -44,8 +44,7 @@ class WithdrawalPrivateCustomCurrencyCalculator extends WithdrawalPrivateCalcula
         return $this->math->div(
                 $this->math->mul(
                     $discountInDefaultCurrency,
-                    (string) $this->exchangeRateClient->getExchangeRateForDate(
-                        $transactionDto->getDate(),
+                    (string) $this->exchangeRateClient->getExchangeRate(
                         $this->currencyConfig->getDefaultCurrencyCode(),
                         $transactionDto->getCurrencyCode()
                     )),

@@ -14,7 +14,6 @@ use FeeCalcApp\Calculator\Filter\FilterCreator;
 use FeeCalcApp\Command\CalculateFeeCommand;
 use FeeCalcApp\Config\CurrencyConfig;
 use FeeCalcApp\Helper\DatetimeHelper;
-use FeeCalcApp\Service\ExchangeRate\ExchangeRateCacheProxy;
 use FeeCalcApp\Service\ExchangeRate\ExchangeRateClientInterface;
 use FeeCalcApp\Service\ExchangeRate\ExchangeRateHttpClient;
 use FeeCalcApp\Service\FeeCalculatorCollection;
@@ -55,12 +54,13 @@ return array_merge(
         ExchangeRateClientInterface::class => function(Container $c) {
             $exchangeRateClient = new ExchangeRateHttpClient(
                 $c->get('currency_api_url'),
-                $c->get('currency_api_key')
+                $c->get('currency_api_key'),
+                $c->get(CurrencyConfig::class)
             );
 
             $exchangeRateClient->setLogger($c->get(LoggerInterface::class));
 
-            return new ExchangeRateCacheProxy($exchangeRateClient);
+            return $exchangeRateClient;
         },
 
         DepositCalculator::class => function (Container $c) {
@@ -93,7 +93,7 @@ return array_merge(
                 $c->get(TransactionHistoryManager::class),
                 $c->get('withdrawal_private_fee_rate'),
                 $c->get('private_withdrawal_max_weekly_discounts_number'),
-                $c->get(ExchangeRateCacheProxy::class),
+                $c->get(ExchangeRateClientInterface::class),
                 $c->get(CurrencyConfig::class),
                 $c->get('private_withdrawal_free_weekly_amount'),
             );
