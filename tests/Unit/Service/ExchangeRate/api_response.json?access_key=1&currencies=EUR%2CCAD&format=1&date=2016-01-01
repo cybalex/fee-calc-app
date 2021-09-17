@@ -1,0 +1,12 @@
+{
+  "success":true,
+  "terms":"https:\\/\\/currencylayer.com\\/terms",
+  "privacy":"https:\\/\\/currencylayer.com\\/privacy",
+  "historical":true,
+  "date":"2016-01-06",
+  "timestamp":1452124799,
+  "source":"USD",
+  "quotes":{
+    "USDCAD":0.92771
+  }
+}

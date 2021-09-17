@@ -9,11 +9,6 @@
     "autoload": {
         "psr-4": {
             "FeeCalcApp\\": "src"
-        }
-    },
-    "autoload-dev": {
-        "psr-4": {
-            "FeeCalcApp\\": "tests"
         },
         "classmap": [
             "app/App.php",
@@ -22,12 +17,18 @@
             "app/AppTest.php"
         ]
     },
+    "autoload-dev": {
+        "psr-4": {
+            "FeeCalcApp\\": "tests"
+        }
+    },
     "require": {
         "php": ">=7.4",
         "ext-json": "*",
         "guzzlehttp/guzzle": "^7.3",
         "php-di/php-di": "^6.3",
-        "symfony/console": "^5.3"
+        "symfony/console": "^5.3",
+        "symfony/validator": "^5.3"
     },
     "require-dev": {
         "friendsofphp/php-cs-fixer": "^3.1",
@@ -41,11 +42,16 @@
     "scripts": {
         "phpunit": "phpunit",
         "fix-cs": "php-cs-fixer fix",
+        "cs-fix": "@fix-cs",
         "test-cs": "php-cs-fixer fix --dry-run -v",
+        "cs-test": "@test-cs",
         "test": ["@phpunit", "@test-cs"],
         "test-coverage": [
             "bin/pcov clobber",
             "@phpunit --coverage-html var/reports/coverage --coverage-clover var/reports/coverage/coverage.xml tests"
-        ]
+        ],
+        "coverage-test": "@test-coverage",
+        "clear-logs": "rm -f var/log/logs.txt",
+        "run-app": "php -f public/script.php fee.calculate --file=etc/input.csv"
     }
 }

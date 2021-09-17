@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace FeeCalcApp\DTO;
 
-class ProcessedTransactionDto extends Transaction
+class ProcessedTransactionDto extends AbstractTransaction
 {
     private string $fee;
 
@@ -15,7 +15,7 @@ class ProcessedTransactionDto extends Transaction
         $this->userId = $transactionDto->getUserId();
         $this->clientType = $transactionDto->getClientType();
         $this->date = $transactionDto->getDate();
-        $this->currency = $transactionDto->getCurrency();
+        $this->currencyCode = $transactionDto->getCurrencyCode();
         $this->amount = $transactionDto->getAmount();
         $this->operationType = $transactionDto->getOperationType();
         $this->id = $transactionDto->getId();

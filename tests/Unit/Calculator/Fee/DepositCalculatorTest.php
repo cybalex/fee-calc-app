@@ -33,17 +33,6 @@ class DepositCalculatorTest extends TestCase
         $this->assertEquals('30.00', (new DepositCalculator($math, self::FEE_RATE))->calculate($transactionDto));
     }
 
-    /**
-     * @dataProvider transactionTypeProvider
-     */
-    public function testApplicable(string $operationType, bool $expectedResult): void
-    {
-        $depositCalculator = new DepositCalculator($this->math, self::FEE_RATE);
-        $transactionDto = $this->createMock(TransactionDto::class);
-        $transactionDto->expects($this->once())->method('getOperationType')->with()->willReturn($operationType);
-        $this->assertEquals($expectedResult, $depositCalculator->isApplicable($transactionDto));
-    }
-
     public function transactionTypeProvider(): \Generator
     {
         yield [TransactionDto::OPERATION_TYPE_DEPOSIT, true];

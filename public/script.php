@@ -15,4 +15,3 @@ $container = (new AppFactory())->create($env)->buildContainer();
 $application = new Application();
 $application->add($container->get(CalculateFeeCommand::class));
 $application->run();
-
