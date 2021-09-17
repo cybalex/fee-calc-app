@@ -25,7 +25,7 @@ return [
 
     'logs_date_format' => 'Y-m-d H:i:s',
     'currency_api_url' => 'http://api.currencylayer.com/historical',
-    'currency_api_key' => '2623fe61c14e8d237ae2a01361603707',
+    'currency_api_key' => '3705d9f2a50db087a3c805bad1cdd96a',
 
     'deposit_fee_rate' => 0.0003,
     'private_withdrawal_free_weekly_amount' => 100000,
