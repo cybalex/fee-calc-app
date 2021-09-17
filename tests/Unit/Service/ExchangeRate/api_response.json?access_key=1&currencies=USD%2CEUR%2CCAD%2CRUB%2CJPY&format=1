@@ -7,6 +7,10 @@
   "timestamp":1452124799,
   "source":"USD",
   "quotes":{
-    "USDCAD":0.92771
+    "USDEUR":0.848995,
+    "USDUSD":1.00,
+    "USDJPY":109.934499,
+    "USDCAD":1.111,
+    "USDRUB":1200.03
   }
 }

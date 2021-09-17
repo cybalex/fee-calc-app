@@ -47,4 +47,9 @@ class CurrencyConfig
 
         return $this->currencyScaleMap[$currencyCode] ?? $this->currencyDefaultScale;
     }
+
+    public function getSupportedCurrencies(): array
+    {
+        return $this->supportedCurrencies;
+    }
 }

@@ -76,8 +76,7 @@ class TransactionHistoryManager
                 : $this->math->mul(
                     $this->math->div(
                         (string) $transaction->getAmount(),
-                        (string) $this->exchangeRateClient->getExchangeRateForDate(
-                            $transaction->getDate(),
+                        (string) $this->exchangeRateClient->getExchangeRate(
                             $inCurrency,
                             $transactionCurrencyCode
                         )
