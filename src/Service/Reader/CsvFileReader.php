@@ -4,17 +4,23 @@ declare(strict_types=1);
 
 namespace FeeCalcApp\Service\Reader;
 
+use FeeCalcApp\Helper\File\FileInfoInterface;
 use InvalidArgumentException;
 use RuntimeException;
-use SplFileInfo;
 
 class CsvFileReader implements FileReaderInterface
 {
     private const CSV_SEPARATOR = ',';
+    private FileInfoInterface $fileInfo;
+
+    public function __construct(FileInfoInterface $fileInfo)
+    {
+        $this->fileInfo = $fileInfo;
+    }
 
     public function read(string $filePath): array
     {
-        $fileInfo = new SplFileInfo($filePath);
+        $fileInfo = $this->fileInfo->getFileInfo($filePath);
 
         if (!$fileInfo->isFile()) {
             throw new InvalidArgumentException("The provided file \"$filePath\" is not a valid file");
