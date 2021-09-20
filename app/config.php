@@ -13,7 +13,11 @@ use FeeCalcApp\Calculator\Fee\WithdrawalPrivateNoDiscountCalculator;
 use FeeCalcApp\Calculator\Filter\FilterCreator;
 use FeeCalcApp\Command\CalculateFeeCommand;
 use FeeCalcApp\Config\CurrencyConfig;
+use FeeCalcApp\Helper\Clock\Clock;
+use FeeCalcApp\Helper\Clock\ClockInterface;
 use FeeCalcApp\Helper\DatetimeHelper;
+use FeeCalcApp\Helper\File\FileInfo;
+use FeeCalcApp\Helper\File\FileInfoInterface;
 use FeeCalcApp\Service\ExchangeRate\ExchangeRateClientInterface;
 use FeeCalcApp\Service\ExchangeRate\ExchangeRateHttpClient;
 use FeeCalcApp\Service\FeeCalculatorCollection;
@@ -45,7 +49,11 @@ return array_merge(
     $feeCalculatorConfig,
     [
         TransactionStorageInterface::class => DI\create(InMemoryTransactionStorage::class),
-        FileReaderInterface::class => DI\create(CsvFileReader::class),
+        FileReaderInterface::class => function (Container $c) {
+            return new CsvFileReader($c->get(FileInfoInterface::class));
+        },
+        ClockInterface::class => DI\create(Clock::class),
+        FileInfoInterface::class => DI\create(FileInfo::class),
 
         Math::class => function (Container $c) {
             return new Math($c->get('currency_default_scale'));
@@ -138,7 +146,12 @@ return array_merge(
             return new PlainTextLogFormatter($c->get('logs_date_format'));
         },
         LoggerInterface::class => function(Container $c) {
-            return new FileLogger($c->get(LogFormatterInterface::class), $c->get('log_file'));
+            return new FileLogger(
+                $c->get(LogFormatterInterface::class),
+                $c->get('log_file'),
+                $c->get(ClockInterface::class),
+                $c->get(FileInfoInterface::class)
+            );
         },
 
         CalculateFeeCommand::class => function (Container $c) {
