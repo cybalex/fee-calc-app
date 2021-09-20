@@ -9,7 +9,6 @@ use FeeCalcApp\Service\Transaction\Processor\TransactionProcessor;
 use FeeCalcApp\Service\Transaction\TransactionContext;
 use FeeCalcApp\Service\Validation\TransactionRequestValidator;
 use Psr\Log\LoggerInterface;
-use Psr\Log\NullLogger;
 
 class TransactionHandler
 {
@@ -24,12 +23,13 @@ class TransactionHandler
     public function __construct(
         TransactionRequestValidator $transactionRequestValidator,
         TransactionMapper $transactionMapper,
-        TransactionProcessor $transactionProcessor
+        TransactionProcessor $transactionProcessor,
+        LoggerInterface $logger
     ) {
         $this->transactionRequestValidator = $transactionRequestValidator;
         $this->transactionMapper = $transactionMapper;
         $this->transactionProcessor = $transactionProcessor;
-        $this->logger = new NullLogger();
+        $this->logger = $logger;
     }
 
     public function addTransaction(TransactionRequest $transactionRequest): self
@@ -71,11 +71,6 @@ class TransactionHandler
                 return $this->transactionProcessor->process($transactionDto, $transactionContext);
             }
         );
-    }
-
-    public function setLogger(LoggerInterface $logger): void
-    {
-        $this->logger = $logger;
     }
 
     public function getOriginalTransactionOrder(): array

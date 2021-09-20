@@ -7,7 +7,6 @@ namespace FeeCalcApp\Service\ExchangeRate;
 use FeeCalcApp\Config\CurrencyConfig;
 use FeeCalcApp\Exception\BadResponseException;
 use Psr\Log\LoggerInterface;
-use Psr\Log\NullLogger;
 use RuntimeException;
 use Throwable;
 
@@ -25,12 +24,13 @@ class ExchangeRateHttpClient implements ExchangeRateClientInterface
     public function __construct(
         string $currencyApiUrl,
         string $currencyApiKey,
-        CurrencyConfig $currencyConfig
+        CurrencyConfig $currencyConfig,
+        LoggerInterface $logger
     ) {
         $this->currencyApiUrl = $currencyApiUrl;
         $this->currencyApiKey = $currencyApiKey;
         $this->currencyConfig = $currencyConfig;
-        $this->logger = new NullLogger();
+        $this->logger = $logger;
     }
 
     /**
@@ -46,11 +46,6 @@ class ExchangeRateHttpClient implements ExchangeRateClientInterface
         }
 
         return $this->exchangeRates[$currency1.$currency2];
-    }
-
-    public function setLogger($logger): void
-    {
-        $this->logger = $logger;
     }
 
     private function getExchangeRates(): array

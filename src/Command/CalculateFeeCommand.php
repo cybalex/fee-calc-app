@@ -10,7 +10,6 @@ use FeeCalcApp\Service\TransactionHandler;
 use FeeCalcApp\Service\TransactionHistoryManager;
 use FeeCalcApp\Service\TransactionRequest;
 use Psr\Log\LoggerInterface;
-use Psr\Log\NullLogger;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -33,21 +32,15 @@ class CalculateFeeCommand extends Command
         FileReaderInterface $fileReader,
         TransactionHandler $transactionHandler,
         TransactionHistoryManager $transactionHistoryManager,
-        CurrencyConfig $currencyConfig
+        CurrencyConfig $currencyConfig,
+        LoggerInterface $logger
     ) {
         parent::__construct(static::$defaultName);
         $this->fileReader = $fileReader;
         $this->transactionHandler = $transactionHandler;
         $this->transactionHistoryManager = $transactionHistoryManager;
         $this->currencyConfig = $currencyConfig;
-        $this->logger = new NullLogger();
-    }
-
-    public function setLogger(LoggerInterface $logger): self
-    {
         $this->logger = $logger;
-
-        return $this;
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)

@@ -52,15 +52,12 @@ return array_merge(
         },
 
         ExchangeRateClientInterface::class => function(Container $c) {
-            $exchangeRateClient = new ExchangeRateHttpClient(
+            return new ExchangeRateHttpClient(
                 $c->get('currency_api_url'),
                 $c->get('currency_api_key'),
-                $c->get(CurrencyConfig::class)
+                $c->get(CurrencyConfig::class),
+                $c->get(LoggerInterface::class)
             );
-
-            $exchangeRateClient->setLogger($c->get(LoggerInterface::class));
-
-            return $exchangeRateClient;
         },
 
         DepositCalculator::class => function (Container $c) {
@@ -145,15 +142,13 @@ return array_merge(
         },
 
         CalculateFeeCommand::class => function (Container $c) {
-            $command = new CalculateFeeCommand(
+            return new CalculateFeeCommand(
                 $c->get(FileReaderInterface::class),
                 $c->get(TransactionHandler::class),
                 $c->get(TransactionHistoryManager::class),
-                $c->get(CurrencyConfig::class)
+                $c->get(CurrencyConfig::class),
+                $c->get(LoggerInterface::class)
             );
-            $command->setLogger($c->get(LoggerInterface::class));
-
-            return $command;
         },
 
         ValidatorInterface::class => function () {
@@ -181,15 +176,12 @@ return array_merge(
         },
 
         TransactionHandler::class => function (Container $c) {
-            $transactionHandler = new TransactionHandler(
+            return new TransactionHandler(
                 $c->get(TransactionRequestValidator::class),
                 $c->get(TransactionMapper::class),
-                $c->get(TransactionProcessor::class)
+                $c->get(TransactionProcessor::class),
+                $c->get(LoggerInterface::class)
             );
-
-            $transactionHandler->setLogger($c->get(LoggerInterface::class));
-
-            return $transactionHandler;
         },
         PlainTextLogFormatter::class => function (Container $c) {
             return new PlainTextLogFormatter($c->get('logs_date_format'));
