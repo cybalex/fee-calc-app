@@ -9,8 +9,8 @@ use FeeCalcApp\Helper\File\FileInfoInterface;
 use FeeCalcApp\Service\Logger\FileLogger;
 use FeeCalcApp\Service\Logger\LogFormatterInterface;
 use FeeCalcApp\Stub\Clock;
+use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
-use RuntimeException;
 use SplFileInfo;
 use SplTempFileObject;
 
@@ -58,9 +58,8 @@ class FileLoggerTest extends TestCase
         $this->assertEquals($formattedData, $tmpFile->fgets());
     }
 
-    public function testRuntimeException() {
+    public function testInvalidArgumentException() {
         $logFormatter = $this->createMock(LogFormatterInterface::class);
-        $logFormatter->expects($this->never())->method('format');
 
         $fileInfoMock = $this->createMock(SplFileInfo::class);
         $fileInfoMock->expects($this->once())->method('isFile')->willReturn(true);
@@ -71,16 +70,14 @@ class FileLoggerTest extends TestCase
         $fileInfo->expects($this->once())->method('getFileInfo')->with(self::LOG_FILE_PATH)
             ->willReturn($fileInfoMock);
 
-        $fileLogger = new FileLogger(
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage("Log file \"" . self::LOG_FILE_PATH . "\" is not writable");
+
+        new FileLogger(
             $logFormatter,
             self::LOG_FILE_PATH,
             new Clock(),
             $fileInfo
         );
-
-        $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage("Log file \"" . self::LOG_FILE_PATH . "\" is not writable");
-
-        $fileLogger->log(self::LOG_LEVEL, self::LOG_TEXT, self::LOG_CONTEXT);
     }
 }
