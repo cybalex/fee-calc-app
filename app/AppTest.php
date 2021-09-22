@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 class AppTest extends App
 {
-    protected function getConfig(): string
+    public function getConfigDir(): string
     {
-        return __DIR__ . '/config_test.php';
+        return __DIR__ . '/config/test/';
     }
 }

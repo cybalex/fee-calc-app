@@ -20,9 +20,9 @@ class FileLogger extends AbstractLogger
 
     public function __construct(
         LogFormatterInterface $logFormatter,
-        string                $logFilePath,
-        ClockInterface        $clockInterface,
-        FileInfoInterface     $fileInfo
+        string $logFilePath,
+        ClockInterface $clockInterface,
+        FileInfoInterface $fileInfo
     ) {
         $this->logFormatter = $logFormatter;
         $this->logFilePath = $logFilePath;

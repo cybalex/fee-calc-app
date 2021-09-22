@@ -10,13 +10,15 @@ class App implements AppInterface
     public function buildContainer(array $definitions = []): Container
     {
         return (new ContainerBuilder())
-            ->addDefinitions($this->getConfig())
+            ->addDefinitions($this->getConfigDir() . 'parameters.php')
+            ->addDefinitions($this->getConfigDir() . 'fee_calculators_config.php')
+            ->addDefinitions($this->getConfigDir() . 'config.php')
             ->addDefinitions($definitions)
             ->build();
     }
 
-    protected function getConfig(): string
+    public function getConfigDir(): string
     {
-        return __DIR__ . '/config.php';
+        return __DIR__ . '/config/prod/';
     }
 }
