@@ -11,9 +11,11 @@ use FeeCalcApp\Service\TransactionHistoryManager;
 use FeeCalcApp\Service\TransactionRequest;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Helper\QuestionHelper;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Question\Question;
 use Throwable;
 
 class CalculateFeeCommand extends Command
@@ -45,7 +47,20 @@ class CalculateFeeCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $filePath = $input->getOption('file');
+        if ($input->getOption('file')) {
+            $filePath = $input->getOption('file');
+        } else {
+            $question = new Question("Enter a path to a CSV file with transactions to parse\n");
+            /** @var QuestionHelper $helper */
+            $helper = $this->getHelper('question');
+
+            if (null === $filePath = $helper->ask($input, $output, $question)) {
+                $output->write("The csv file path was a required parameter for the program to run. Exiting...\n");
+                $this->logger->error("The required \"--file\" parameter was not provided when running the \"" . self::$defaultName . "\" command");
+
+                return 1;
+            }
+        }
 
         try {
             $transactionsData = $this->fileReader->read($filePath);

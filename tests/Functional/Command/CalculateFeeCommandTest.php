@@ -10,10 +10,63 @@ use FeeCalcApp\Command\CalculateFeeCommand;
 use FeeCalcApp\Service\TransactionHandler;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\Console\Helper\HelperSet;
+use Symfony\Component\Console\Helper\QuestionHelper;
 use Symfony\Component\Console\Tester\CommandTester;
 
 class CalculateFeeCommandTest extends TestCase
 {
+    public function testExecuteWithoutInputFile(): void
+    {
+        $logger = $this->createMock(LoggerInterface::class);
+        $logger->expects($this->once())->method('error')
+            ->with("The required \"--file\" parameter was not provided when running the \"fee.calculate\" command");
+
+        $appFactory = new AppFactory();
+        $app = $appFactory->create('test');
+        $container = $app->buildContainer([LoggerInterface::class => $logger]);
+
+        /** @var CalculateFeeCommand $command */
+        $command = $container->get(CalculateFeeCommand::class);
+        $questionHelper = $this->createMock(QuestionHelper::class);
+        $questionHelper->expects($this->once())->method('ask');
+        $questionHelper->expects($this->once())->method('getName')->with()->willReturn('question');
+        $command->setHelperSet(new HelperSet([$questionHelper]));
+        $commandTester = new CommandTester($command);
+
+        $this->assertEquals(
+            1,
+            $commandTester->execute([])
+        );
+
+        $this->assertEquals(
+            "The csv file path was a required parameter for the program to run. Exiting...\n",
+            $commandTester->getDisplay()
+        );
+    }
+
+    public function testExecuteCommandWithPromptedParameter(): void
+    {
+        $appFactory = new AppFactory();
+        $app = $appFactory->create('test');
+        $container = $app->buildContainer();
+
+        /** @var CalculateFeeCommand $command */
+        $command = $container->get(CalculateFeeCommand::class);
+        $questionHelper = $this->createMock(QuestionHelper::class);
+        $questionHelper->expects($this->once())->method('ask')->willReturn('./tests/Functional/Command/input_test.txt');
+        $questionHelper->expects($this->once())->method('getName')->with()->willReturn('question');
+        $command->setHelperSet(new HelperSet([$questionHelper]));
+        $commandTester = new CommandTester($command);
+
+        $this->assertEquals(
+            0,
+            $commandTester->execute([])
+        );
+
+        $this->assertEquals($this->getSuccessOutput(), $commandTester->getDisplay());
+    }
+
     public function testExecuteCommand(): void
     {
         $appFactory = new AppFactory();
@@ -28,23 +81,7 @@ class CalculateFeeCommandTest extends TestCase
             $commandTester->execute(['--file' => './tests/Functional/Command/input_test.txt'])
         );
 
-        $this->assertEquals(<<<TEXT
-0.60
-3.00
-0.00
-0.06
-1.50
-0
-0.70
-0.30
-0.30
-3.00
-0.00
-0.00
-8612
-
-TEXT
-, $commandTester->getDisplay());
+        $this->assertEquals($this->getSuccessOutput(), $commandTester->getDisplay());
     }
 
     public function testExecuteCommandThrowsException(): void
@@ -194,5 +231,25 @@ TEXT
         $this->assertEquals($message, $logData['message']);
 
         return true;
+    }
+
+    private function getSuccessOutput(): string
+    {
+        return <<<TEXT
+0.60
+3.00
+0.00
+0.06
+1.50
+0
+0.70
+0.30
+0.30
+3.00
+0.00
+0.00
+8612
+
+TEXT;
     }
 }

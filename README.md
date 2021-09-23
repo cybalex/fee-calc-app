@@ -59,10 +59,24 @@ and run the command in the command line:
 docker run -it \
   --rm --volume=$(pwd):/var/www/fee-calculator:z \
   fee_calc_app \
+  sh -c "composer run-app"
+```
+In this script *etc/input.csv* csv file will be used to run the app.
+
+
+To run the fee calculation script with a custom input csv file, run the following command from CLI:
+```bash
+docker run -it \
+  --rm --volume=$(pwd):/var/www/fee-calculator:z \
+  fee_calc_app \
   sh -c "php -f public/script.php fee.calculate --file=etc/input.csv"
 ```
 
-Feel free to modify `etc/input.csv` or use alternative input file.
+Feel free to modify `etc/input.csv` or use alternative input file to test different transaction sequences 
+and different scenarios.
+
+In case the *fee.calculate* command is not provided with the *--file* option, prompted to input a csv file 
+will be shown in the console.
 
 ## Running tests
 
@@ -91,8 +105,5 @@ Coverage report will be available under `var/reports/coverage` directory.
  - removed bcmath  extension as do not use it;
  - added json extension for parsing responses from API
  - restricted version of PHP to 7.4(and therefore had to update phpcsfixer version from 2.x to 3.x and its config)
-
-### Essential ToDo's as of 02/09/2021:
- - create custom validator for transaction entity
 
 Happy testing :)
