@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace FeeCalcApp\Functional\Command;
 
-use AppFactory;
 use Exception;
 use FeeCalcApp\Command\CalculateFeeCommand;
 use FeeCalcApp\Service\TransactionHandler;
+use FeeCalcApp\Traits\ContainerAware;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Helper\HelperSet;
@@ -16,15 +16,16 @@ use Symfony\Component\Console\Tester\CommandTester;
 
 class CalculateFeeCommandTest extends TestCase
 {
+    use ContainerAware;
+
     public function testExecuteWithoutInputFile(): void
     {
         $logger = $this->createMock(LoggerInterface::class);
         $logger->expects($this->once())->method('error')
             ->with("The required \"--file\" parameter was not provided when running the \"fee.calculate\" command");
 
-        $appFactory = new AppFactory();
-        $app = $appFactory->create('test');
-        $container = $app->buildContainer([LoggerInterface::class => $logger]);
+        $this->replaceService(LoggerInterface::class, $logger);
+        $container = $this->getContainer();
 
         /** @var CalculateFeeCommand $command */
         $command = $container->get(CalculateFeeCommand::class);
@@ -47,12 +48,8 @@ class CalculateFeeCommandTest extends TestCase
 
     public function testExecuteCommandWithPromptedParameter(): void
     {
-        $appFactory = new AppFactory();
-        $app = $appFactory->create('test');
-        $container = $app->buildContainer();
-
         /** @var CalculateFeeCommand $command */
-        $command = $container->get(CalculateFeeCommand::class);
+        $command = $this->getContainer()->get(CalculateFeeCommand::class);
         $questionHelper = $this->createMock(QuestionHelper::class);
         $questionHelper->expects($this->once())->method('ask')->willReturn('./tests/Functional/Command/input_test.txt');
         $questionHelper->expects($this->once())->method('getName')->with()->willReturn('question');
@@ -69,11 +66,7 @@ class CalculateFeeCommandTest extends TestCase
 
     public function testExecuteCommand(): void
     {
-        $appFactory = new AppFactory();
-        $app = $appFactory->create('test');
-        $container = $app->buildContainer();
-
-        $command = $container->get(CalculateFeeCommand::class);
+        $command = $this->getContainer()->get(CalculateFeeCommand::class);
 
         $commandTester = new CommandTester($command);
         $this->assertEquals(
@@ -98,13 +91,12 @@ class CalculateFeeCommandTest extends TestCase
                 return true;
             }));
 
-        $appFactory = new AppFactory();
-        $app = $appFactory->create('test');
-        $container = $app->buildContainer([TransactionHandler::class => $handler, LoggerInterface::class => $logger]);
+        $container = $this
+            ->replaceService(TransactionHandler::class, $handler)
+            ->replaceService(LoggerInterface::class, $logger)
+            ->getContainer();
 
         $command = $container->get(CalculateFeeCommand::class);
-
-        $container->set(TransactionHandler::class, $handler);
 
         $commandTester = new CommandTester($command);
         $this->assertEquals(
@@ -205,12 +197,8 @@ class CalculateFeeCommandTest extends TestCase
                 ],
             );
 
-        $appFactory = new AppFactory();
-        $app = $appFactory->create('test');
-        $container = $app->buildContainer([LoggerInterface::class => $logger]);
-
+        $container = $this->replaceService(LoggerInterface::class, $logger)->getContainer();
         $command = $container->get(CalculateFeeCommand::class);
-
         $commandTester = new CommandTester($command);
 
         $this->assertEquals(0, $commandTester->execute(['--file' => './tests/Functional/Command/input_test_violated.txt']));

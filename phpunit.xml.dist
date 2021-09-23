@@ -17,6 +17,7 @@
         <testsuite name="Project Test Suite">
             <directory>tests/</directory>
             <exclude>./tests/Stub/</exclude>
+            <exclude>./tests/Traits/</exclude>
         </testsuite>
     </testsuites>
 
