@@ -75,8 +75,8 @@ docker run -it \
 Feel free to modify `etc/input.csv` or use alternative input file to test different transaction sequences 
 and different scenarios.
 
-In case the *fee.calculate* command is not provided with the *--file* option, prompted to input a csv file 
-will be shown in the console.
+In case the *fee.calculate* command is not provided with the *--file* option, location of a csv file 
+will be prompted in the console.
 
 ## Running tests
 
@@ -98,12 +98,3 @@ docker run -it \
   sh -c "composer test-coverage"
 ```
 Coverage report will be available under `var/reports/coverage` directory.
-
-## Additional info
-
-### Changes made to the initial app skeleton:
- - removed bcmath  extension as do not use it;
- - added json extension for parsing responses from API
- - restricted version of PHP to 7.4(and therefore had to update phpcsfixer version from 2.x to 3.x and its config)
-
-Happy testing :)
