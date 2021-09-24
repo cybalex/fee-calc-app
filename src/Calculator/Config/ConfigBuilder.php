@@ -54,7 +54,7 @@ class ConfigBuilder implements ConfigBuilderInterface
             $parentConfig = $this->mergeParentConfig($parentConfig, $parentConfig['extends'], $config);
         }
 
-        foreach (['props', 'requirements'] as $key) {
+        foreach (['params', 'requirements'] as $key) {
             $childConfig[$key] = array_merge(
                 $parentConfig[$key] ?? [],
                 $childConfig[$key] ?? []

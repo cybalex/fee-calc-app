@@ -4,22 +4,27 @@ declare(strict_types=1);
 
 namespace FeeCalcApp\Calculator\Fee;
 
+use FeeCalcApp\Calculator\CalculatorCompiler;
+use FeeCalcApp\Calculator\Config\Params\Exception\MissingConfigParameterException;
+use FeeCalcApp\Calculator\Config\Params\Item\FeeRateParameter;
 use FeeCalcApp\Dto\TransactionDto;
 use FeeCalcApp\Service\Math;
 
 class DepositCalculator extends AbstractCalculator
 {
-    private float $feeRate;
     private Math $math;
 
-    public function __construct(Math $math, float $feeRate)
+    public function __construct(CalculatorCompiler $calculatorCompiler, Math $math)
     {
+        parent::__construct($calculatorCompiler);
         $this->math = $math;
-        $this->feeRate = $feeRate;
     }
 
     public function calculate(TransactionDto $transactionDto): string
     {
-        return $this->math->mul((string) $transactionDto->getAmount(), (string) $this->feeRate);
+        return $this->math->mul(
+            (string) $transactionDto->getAmount(),
+            (string) $this->paramBag->getParam(FeeRateParameter::PARAM_NAME)->getValue()
+        );
     }
 }

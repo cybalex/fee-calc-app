@@ -7,7 +7,6 @@ use FeeCalcApp\Calculator\Fee\WithdrawalPrivateCalculator;
 use FeeCalcApp\Calculator\Fee\WithdrawalPrivateCustomCurrencyCalculator;
 use FeeCalcApp\Calculator\Fee\WithdrawalPrivateNoDiscountCalculator;
 
-// ToDo: Add support for 'params' key to inject needed parameters into calculator classes from config
 return [
     'fee_calculation_config' => [
         DepositCalculator::class => [
@@ -39,9 +38,6 @@ return [
                 'fee_rate' => function(Container $c) {
                     return $c->get('withdrawal_private_fee_rate');
                 },
-                'max_weekly_discounts_number' => function (Container $c) {
-                    return $c->get('private_withdrawal_max_weekly_discounts_number');
-                },
             ],
             'requirements' => [
                 'operation_type' => 'withdraw',
@@ -57,7 +53,7 @@ return [
         WithdrawalPrivateCalculator::class => [
             'enabled' => true,
             'extends' => WithdrawalPrivateNoDiscountCalculator::class,
-            'props' => [
+            'params' => [
                 'free_weekly_transaction_amount' => function (Container $c) {
                     return $c->get('private_withdrawal_free_weekly_amount');
                 }

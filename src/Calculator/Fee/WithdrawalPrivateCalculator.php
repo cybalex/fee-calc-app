@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace FeeCalcApp\Calculator\Fee;
 
+use FeeCalcApp\Calculator\CalculatorCompiler;
+use FeeCalcApp\Calculator\Config\Params\Item\FeeRateParameter;
+use FeeCalcApp\Calculator\Config\Params\Item\FreeWeeklyTransactionAmount;
 use FeeCalcApp\Calculator\FeeDiscountCalculatorInterface;
 use FeeCalcApp\Calculator\Filter\FilterInterface;
 use FeeCalcApp\Config\CurrencyConfig;
@@ -15,20 +18,15 @@ class WithdrawalPrivateCalculator extends WithdrawalPrivateNoDiscountCalculator 
 {
     protected CurrencyConfig $currencyConfig;
 
-    protected int $freeWithdrawalWeeklyAmount;
-
     public function __construct(
+        CalculatorCompiler $calculatorCompiler,
         Math $math,
         TransactionHistoryManager $transactionHistoryManager,
-        float $withdrawalFeeRate,
-        int $maxWeeklyDiscountsNumber,
-        CurrencyConfig $currencyConfig,
-        int $freeWithdrawalWeeklyAmount
+        CurrencyConfig $currencyConfig
     ) {
-        parent::__construct($math, $transactionHistoryManager, $withdrawalFeeRate, $maxWeeklyDiscountsNumber);
+        parent::__construct($calculatorCompiler, $math, $transactionHistoryManager);
 
         $this->currencyConfig = $currencyConfig;
-        $this->freeWithdrawalWeeklyAmount = $freeWithdrawalWeeklyAmount;
     }
 
     public function calculate(TransactionDto $transactionDto): string
@@ -55,9 +53,12 @@ class WithdrawalPrivateCalculator extends WithdrawalPrivateNoDiscountCalculator 
         string $totalAmountWithdrawalsForAWeek
     ): string {
         return $this->math->mul(
-            (string) $this->withdrawalFeeRate,
+            (string) $this->paramBag->getParam(FeeRateParameter::PARAM_NAME)->getValue(),
             $this->math->max(
-                $this->math->sub((string) $this->freeWithdrawalWeeklyAmount, $totalAmountWithdrawalsForAWeek),
+                $this->math->sub(
+                    (string) $this->paramBag->getParam(FreeWeeklyTransactionAmount::PARAM_NAME)->getValue(),
+                    $totalAmountWithdrawalsForAWeek
+                ),
                 '0'
             )
         );

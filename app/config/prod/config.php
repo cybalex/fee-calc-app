@@ -5,6 +5,7 @@ use FeeCalcApp\Calculator\CalculatorCompiler;
 use FeeCalcApp\Calculator\Config\ConfigBuilder;
 use FeeCalcApp\Calculator\Config\ConfigBuilderInterface;
 use FeeCalcApp\Calculator\Config\FilterProvider;
+use FeeCalcApp\Calculator\Config\Params\ParametersFactory;
 use FeeCalcApp\Calculator\Fee\DepositCalculator;
 use FeeCalcApp\Calculator\Fee\WithdrawalBusinessCalculator;
 use FeeCalcApp\Calculator\Fee\WithdrawalPrivateCalculator;
@@ -69,59 +70,51 @@ return array_merge(
         },
 
         DepositCalculator::class => function (Container $c) {
-            $calculator = new DepositCalculator($c->get(Math::class), $c->get('deposit_fee_rate'));
-
-            return $c->get(CalculatorCompiler::class)->compileFilters($calculator);
+            return new DepositCalculator(
+                $c->get(CalculatorCompiler::class),
+                $c->get(Math::class)
+            );
         },
 
         WithdrawalBusinessCalculator::class => function (Container $c) {
-            $calculator = new WithdrawalBusinessCalculator($c->get(Math::class), $c->get('withdrawal_business_fee_rate'));
-
-            return $c->get(CalculatorCompiler::class)->compileFilters($calculator);
+            return new WithdrawalBusinessCalculator(
+                $c->get(CalculatorCompiler::class),
+                $c->get(Math::class)
+            );
         },
 
         WithdrawalPrivateCalculator::class => function(Container $c) {
-            $calculator = new WithdrawalPrivateCalculator(
+            return new WithdrawalPrivateCalculator(
+                $c->get(CalculatorCompiler::class),
                 $c->get(Math::class),
                 $c->get(TransactionHistoryManager::class),
-                $c->get('withdrawal_private_fee_rate'),
-                $c->get('private_withdrawal_max_weekly_discounts_number'),
-                $c->get(CurrencyConfig::class),
-                $c->get('private_withdrawal_free_weekly_amount'),
+                $c->get(CurrencyConfig::class)
             );
-
-            return $c->get(CalculatorCompiler::class)->compileFilters($calculator);
         },
         WithdrawalPrivateCustomCurrencyCalculator::class => function(Container $c) {
-            $calculator =  new WithdrawalPrivateCustomCurrencyCalculator(
+            return new WithdrawalPrivateCustomCurrencyCalculator(
+                $c->get(CalculatorCompiler::class),
                 $c->get(Math::class),
                 $c->get(TransactionHistoryManager::class),
-                $c->get('withdrawal_private_fee_rate'),
-                $c->get('private_withdrawal_max_weekly_discounts_number'),
                 $c->get(ExchangeRateClientInterface::class),
-                $c->get(CurrencyConfig::class),
-                $c->get('private_withdrawal_free_weekly_amount'),
+                $c->get(CurrencyConfig::class)
             );
-
-            return $c->get(CalculatorCompiler::class)->compileFilters($calculator);
         },
         WithdrawalPrivateNoDiscountCalculator::class => function (Container $c) {
-            $calculator =  new WithdrawalPrivateNoDiscountCalculator(
+            return new WithdrawalPrivateNoDiscountCalculator(
+                $c->get(CalculatorCompiler::class),
                 $c->get(Math::class),
-                $c->get(TransactionHistoryManager::class),
-                $c->get('withdrawal_private_fee_rate'),
-                $c->get('private_withdrawal_max_weekly_discounts_number')
+                $c->get(TransactionHistoryManager::class)
             );
-
-            return $c->get(CalculatorCompiler::class)->compileFilters($calculator);
         },
         FeeCalculatorCollection::class => function (Container $c) {
-            return (new FeeCalculatorCollection())
+        return (new FeeCalculatorCollection())
                 ->add($c->get(DepositCalculator::class))
                 ->add($c->get(WithdrawalBusinessCalculator::class))
                 ->add($c->get(WithdrawalPrivateCalculator::class))
                 ->add($c->get(WithdrawalPrivateNoDiscountCalculator::class))
-                ->add($c->get(WithdrawalPrivateCustomCurrencyCalculator::class));
+                ->add($c->get(WithdrawalPrivateCustomCurrencyCalculator::class))
+                ;
         },
 
         FeeCalculationItem::class => function(Container $c) {
@@ -219,8 +212,18 @@ return array_merge(
         ConfigBuilder::class => function (Container $c) {
             return new ConfigBuilder($c->get('fee_calculation_config'));
         },
+        ParametersFactory::class => function (Container $c) {
+            return new ParametersFactory(
+                $c->get(ValidatorInterface::class),
+                $c->get(LoggerInterface::class)
+            );
+        },
         CalculatorCompiler::class => function (Container $c) {
-            return new CalculatorCompiler($c->get(FilterProvider::class), $c->get(ConfigBuilder::class));
+            return new CalculatorCompiler(
+                $c->get(FilterProvider::class),
+                $c->get(ConfigBuilder::class),
+                $c->get(ParametersFactory::class)
+            );
         },
         FilterProvider::class => function (Container $c) {
           return new FilterProvider(
