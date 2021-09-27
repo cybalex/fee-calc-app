@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace FeeCalcApp\Calculator\Fee;
 
-use FeeCalcApp\Calculator\CalculatorCompiler;
 use FeeCalcApp\Calculator\Config\Params\ParamBag;
 use FeeCalcApp\Calculator\FeeCalculatorInterface;
 use FeeCalcApp\Calculator\Filter\FilterInterface;
@@ -17,12 +16,6 @@ abstract class AbstractCalculator implements FeeCalculatorInterface
      */
     protected array $filters = [];
     protected ParamBag $paramBag;
-
-    public function __construct(CalculatorCompiler $calculatorCompiler)
-    {
-        $calculatorCompiler->compileFilters($this);
-        $calculatorCompiler->compileParametersConfig($this);
-    }
 
     public function addFilter(FilterInterface $filter): void
     {

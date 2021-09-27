@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace FeeCalcApp\Calculator\Fee;
 
-use FeeCalcApp\Calculator\CalculatorCompiler;
 use FeeCalcApp\Calculator\Config\Params\Item\FeeRateParameter;
 use FeeCalcApp\Calculator\Config\Params\Item\FreeWeeklyTransactionAmount;
 use FeeCalcApp\Calculator\FeeDiscountCalculatorInterface;
@@ -14,18 +13,19 @@ use FeeCalcApp\Dto\TransactionDto;
 use FeeCalcApp\Service\Math;
 use FeeCalcApp\Service\TransactionHistoryManager;
 
-class WithdrawalPrivateCalculator extends WithdrawalPrivateNoDiscountCalculator implements FeeDiscountCalculatorInterface, FilterInterface
+class WithdrawalPrivateCalculator extends SimpleCalculator implements FeeDiscountCalculatorInterface, FilterInterface
 {
     protected CurrencyConfig $currencyConfig;
+    private TransactionHistoryManager $transactionHistoryManager;
 
     public function __construct(
-        CalculatorCompiler $calculatorCompiler,
         Math $math,
         TransactionHistoryManager $transactionHistoryManager,
         CurrencyConfig $currencyConfig
     ) {
-        parent::__construct($calculatorCompiler, $math, $transactionHistoryManager);
+        parent::__construct($math);
 
+        $this->transactionHistoryManager = $transactionHistoryManager;
         $this->currencyConfig = $currencyConfig;
     }
 

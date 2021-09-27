@@ -7,7 +7,7 @@ namespace FeeCalcApp\Service\Transaction\Processor\Item;
 use FeeCalcApp\Calculator\FeeCalculatorInterface;
 use FeeCalcApp\DTO\ProcessedTransactionDto;
 use FeeCalcApp\DTO\TransactionDto;
-use FeeCalcApp\Service\FeeCalculatorCollection;
+use FeeCalcApp\Service\FeeCalculatorCollectionFactory;
 use FeeCalcApp\Service\Transaction\TransactionContext;
 
 class FeeCalculationItem implements TransactionProcessorItemInterface
@@ -19,9 +19,9 @@ class FeeCalculationItem implements TransactionProcessorItemInterface
 
     private int $priority;
 
-    public function __construct(FeeCalculatorCollection $feeCalculatorCollection, int $priority)
+    public function __construct(FeeCalculatorCollectionFactory $feeCalculatorCollectionFactory, int $priority)
     {
-        $this->feeCalculators = $feeCalculatorCollection->get();
+        $this->feeCalculators = $feeCalculatorCollectionFactory->get();
         $this->priority = $priority;
     }
 

@@ -10,7 +10,7 @@ use FeeCalcApp\Calculator\Config\Params\ParamBag;
 use FeeCalcApp\Calculator\Config\Params\ParametersFactory;
 use RuntimeException;
 
-class CalculatorCompiler
+class CalculatorDecorator
 {
     private FilterProvider $filterProvider;
     private ConfigBuilder $configBuilder;
@@ -26,28 +26,35 @@ class CalculatorCompiler
         $this->paramFactory = $paramFactory;
     }
 
-    public function compileFilters(FeeCalculatorInterface $feeCalculator): void
+    public function compileFilters(string $calculatorName, FeeCalculatorInterface $feeCalculator): void
     {
         $feeCalculatorClass = get_class($feeCalculator);
 
-        if (!isset($this->configBuilder->getConfig()[$feeCalculatorClass])) {
+        $calculatorsConfig = $this->configBuilder->getConfig();
+
+        if (!$this->calculatorConfigExists($calculatorsConfig, $feeCalculatorClass)) {
             throw new RuntimeException(sprintf('No config for "%s" fee calculator was found in the config', $feeCalculatorClass));
         }
 
-        foreach ($this->filterProvider->get($feeCalculatorClass) as $filter) {
+        foreach ($this->filterProvider->get($calculatorName) as $filter) {
             $feeCalculator->addFilter($filter);
         }
     }
 
-    public function compileParametersConfig(FeeCalculatorInterface $feeCalculator): void
+    public function compileParametersConfig(string $calculatorName, FeeCalculatorInterface $feeCalculator): void
     {
+        $config = $this->configBuilder->getConfig();
         $feeCalculatorClass = get_class($feeCalculator);
 
-        if (!isset($this->configBuilder->getConfig()[$feeCalculatorClass])) {
+        if (!isset($config[$calculatorName])) {
+            throw new RuntimeException(sprintf('No config for "%s" fee calculator was found in the config', $calculatorName));
+        }
+
+        if (!$this->calculatorConfigExists($config, $feeCalculatorClass)) {
             throw new RuntimeException(sprintf('No config for "%s" fee calculator was found in the config', $feeCalculatorClass));
         }
 
-        $parametersArray = $this->configBuilder->getConfig()[$feeCalculatorClass]['params'] ?? [];
+        $parametersArray = $this->configBuilder->getConfig()[$calculatorName]['params'] ?? [];
 
         $paramItems = [];
 
@@ -58,5 +65,16 @@ class CalculatorCompiler
         $parameterBag = new ParamBag($paramItems);
 
         $feeCalculator->setParamBag($parameterBag);
+    }
+
+    private function calculatorConfigExists(array $calculatorsConfig, string $calculatorClass): bool
+    {
+        foreach ($calculatorsConfig as $calculatorConfig) {
+            if ($calculatorConfig['calculator'] === $calculatorClass) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

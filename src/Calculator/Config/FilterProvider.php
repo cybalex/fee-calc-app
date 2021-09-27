@@ -19,13 +19,13 @@ class FilterProvider
         $this->filterCreator = $filterCreator;
     }
 
-    protected function getFilterConfig(string $calculatorClass): array
+    protected function getFilterConfig(string $calculatorName): array
     {
-        if (!isset($this->configBuilder->getConfig()[$calculatorClass])) {
-            throw new InvalidArgumentException(sprintf('Fee calculator config was not found for %s', $calculatorClass));
+        if (!isset($this->configBuilder->getConfig()[$calculatorName])) {
+            throw new InvalidArgumentException(sprintf('Fee calculator config was not found for %s', $calculatorName));
         }
 
-        $calculatorConfig = $this->configBuilder->getConfig()[$calculatorClass];
+        $calculatorConfig = $this->configBuilder->getConfig()[$calculatorName];
 
         return array_merge(
             ['is_enabled' => $calculatorConfig['enabled']],
@@ -36,11 +36,11 @@ class FilterProvider
     /**
      * @return FilterInterface[]
      */
-    public function get(string $calculatorClass): array
+    public function get(string $calculatorName): array
     {
         $filters = [];
 
-        foreach ($this->getFilterConfig($calculatorClass) as $filterName => $filterConfig) {
+        foreach ($this->getFilterConfig($calculatorName) as $filterName => $filterConfig) {
             if (is_scalar($filterConfig)) {
                 $filterConfig = [$filterConfig];
             }

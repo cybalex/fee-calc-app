@@ -1,15 +1,14 @@
 <?php
 
 use DI\Container;
-use FeeCalcApp\Calculator\Fee\DepositCalculator;
-use FeeCalcApp\Calculator\Fee\WithdrawalBusinessCalculator;
+use FeeCalcApp\Calculator\Fee\SimpleCalculator;
 use FeeCalcApp\Calculator\Fee\WithdrawalPrivateCalculator;
 use FeeCalcApp\Calculator\Fee\WithdrawalPrivateCustomCurrencyCalculator;
-use FeeCalcApp\Calculator\Fee\WithdrawalPrivateNoDiscountCalculator;
 
 return [
     'fee_calculation_config' => [
-        DepositCalculator::class => [
+        'deposit_calculator' => [
+            'calculator' => SimpleCalculator::class,
             'enabled' => true,
             'params' => [
                 'fee_rate' => function(Container $c) {
@@ -20,7 +19,8 @@ return [
                 'operation_type' => 'deposit',
             ]
         ],
-        WithdrawalBusinessCalculator::class => [
+        'withdrawal_business_calculator' => [
+            'calculator' => SimpleCalculator::class,
             'enabled' => true,
             'params' => [
                 'fee_rate' => function(Container $c) {
@@ -32,7 +32,8 @@ return [
                 'operation_type' => 'withdraw',
             ]
         ],
-        WithdrawalPrivateNoDiscountCalculator::class => [
+        'withdrawal_private_no_discount_calculator' => [
+            'calculator' => SimpleCalculator::class,
             'enabled' => true,
             'params' => [
                 'fee_rate' => function(Container $c) {
@@ -50,9 +51,10 @@ return [
                 }
             ],
         ],
-        WithdrawalPrivateCalculator::class => [
+        'withdrawal_private_calculator' => [
+            'calculator' => WithdrawalPrivateCalculator::class,
             'enabled' => true,
-            'extends' => WithdrawalPrivateNoDiscountCalculator::class,
+            'extends' => 'withdrawal_private_no_discount_calculator',
             'params' => [
                 'free_weekly_transaction_amount' => function (Container $c) {
                     return $c->get('private_withdrawal_free_weekly_amount');
@@ -64,9 +66,10 @@ return [
                 }],
             ]
         ],
-        WithdrawalPrivateCustomCurrencyCalculator::class => [
+        'withdrawal_private_custom_currency_calculator' => [
+            'calculator' => WithdrawalPrivateCustomCurrencyCalculator::class,
             'enabled' => true,
-            'extends' => WithdrawalPrivateCalculator::class,
+            'extends' => 'withdrawal_private_calculator',
             'requirements' => [
                 'currency_code' => ['!=', function (Container $c) {
                     return $c->get('currency_default_code');

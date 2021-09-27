@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace FeeCalcApp\Calculator\Fee;
 
-use FeeCalcApp\Calculator\CalculatorCompiler;
 use FeeCalcApp\Config\CurrencyConfig;
 use FeeCalcApp\DTO\TransactionDto;
 use FeeCalcApp\Service\ExchangeRate\ExchangeRateClientInterface;
@@ -16,14 +15,12 @@ class WithdrawalPrivateCustomCurrencyCalculator extends WithdrawalPrivateCalcula
     private ExchangeRateClientInterface $exchangeRateClient;
 
     public function __construct(
-        CalculatorCompiler $calculatorCompiler,
         Math $math,
         TransactionHistoryManager $transactionHistoryManager,
         ExchangeRateClientInterface $exchangeRateClient,
         CurrencyConfig $currencyConfig
     ) {
         parent::__construct(
-            $calculatorCompiler,
             $math,
             $transactionHistoryManager,
             $currencyConfig,
