@@ -29,7 +29,7 @@ class ParamBag
     public function getParam(string $name): ParameterItemInterface
     {
         if (!isset($this->parameterItems[$name])) {
-            throw new MissingConfigParameterException(sprintf("Missing parameter name \"%s\"", $name));
+            throw new MissingConfigParameterException(sprintf('Missing parameter name "%s"', $name));
         }
 
         return $this->parameterItems[$name];

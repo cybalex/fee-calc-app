@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace FeeCalcApp\Calculator\Config\Params\Item;
 
-use Symfony\Component\Validator\Constraints\GreaterThan;
-
 class FreeWeeklyTransactionAmount implements ParameterItemInterface
 {
     public const PARAM_NAME = 'free_weekly_transaction_amount';

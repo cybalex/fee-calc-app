@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace FeeCalcApp\Calculator\Config\Params\Item;
 
 interface ParameterItemInterface
@@ -10,7 +12,7 @@ interface ParameterItemInterface
     public function getValue();
 
     /**
-     * A name of a config parameter
+     * A name of a config parameter.
      */
     public function getName(): string;
 }

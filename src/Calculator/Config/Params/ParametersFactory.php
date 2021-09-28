@@ -44,16 +44,15 @@ class ParametersFactory
                 return new FreeWeeklyTransactionAmount($value);
         }
 
-        throw new InvalidArgumentException(sprintf("Unknown parameter \"%s\" was provided in the config", $name));
+        throw new InvalidArgumentException(sprintf('Unknown parameter "%s" was provided in the config', $name));
     }
 
     private function getConstraints(string $propName): array
     {
         if (!isset($this->getPropConstraintMap()[$propName])) {
-            throw new MissingConfigParameterException(
-                sprintf("Could not find \"%s\" config param in %s::getPropConstraintMap", $propName, __CLASS__)
-            );
+            throw new MissingConfigParameterException(sprintf('Could not find "%s" config param in %s::getPropConstraintMap', $propName, __CLASS__));
         }
+
         return $this->getPropConstraintMap()[$propName];
     }
 
@@ -67,7 +66,7 @@ class ParametersFactory
             FreeWeeklyTransactionAmount::PARAM_NAME => [
                 new NotNull(),
                 new Regex('/^(0|[1-9]\d*)(.\d+)?$/', 'Amount in wrong format was provided'),
-            ]
+            ],
         ];
     }
 }

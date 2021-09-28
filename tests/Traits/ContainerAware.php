@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace FeeCalcApp\Traits;
 
 use AppFactory;
-use DI\Container;
+use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 trait ContainerAware
 {
@@ -18,12 +18,13 @@ trait ContainerAware
         return $this;
     }
 
-    protected function getContainer(string $env = 'test', array $definitions = []): Container
+    protected function getContainer(string $env = 'test', array $definitions = []): ContainerBuilder
     {
         $appFactory = new AppFactory();
         $app = $appFactory->create($env);
         $container = $app->buildContainer(array_merge($this->replacedServices, $definitions));
         $this->replacedServices = [];
+        $container->compile();
 
         return $container;
     }

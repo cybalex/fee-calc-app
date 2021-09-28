@@ -11,6 +11,7 @@ if (!isset($argv[1])) {
 
 $env = isset($argv[2]) && $argv[2] === 'test' ? 'test' : 'prod';
 $container = (new AppFactory())->create($env)->buildContainer();
+$container->compile();
 
 $application = new Application();
 $application->add($container->get(CalculateFeeCommand::class));
