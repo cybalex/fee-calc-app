@@ -1,6 +1,5 @@
 <?php
 
-use FeeCalcApp\Calculator\Config\ConfigBuilder;
 use FeeCalcApp\Calculator\Config\FilterProvider;
 use FeeCalcApp\Calculator\Filter\FilterCreator;
 use FeeCalcApp\Service\ExchangeRate\ExchangeRateClientInterface;
@@ -21,6 +20,5 @@ return function(ContainerConfigurator $configurator) {
 
     $services
         ->set(FilterProvider::class, FilterProvider::class)
-        ->arg(0, service(ConfigBuilder::class))
-        ->arg(1, service(FilterCreator::class));
+        ->arg(0, service(FilterCreator::class));
 };

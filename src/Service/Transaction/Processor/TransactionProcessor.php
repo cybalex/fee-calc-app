@@ -17,9 +17,8 @@ class TransactionProcessor implements ProcessorInterface
     private array $processors = [];
 
     public function __construct(iterable $processorItems)
-    {//var_export(iterator_to_array($processorItems, true));die;
+    {
         foreach ($processorItems as $processorItem) {
-            //var_export($processorItem);
             $this->addProcessor($processorItem);
         }
 

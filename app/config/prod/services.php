@@ -2,6 +2,7 @@
 
 use FeeCalcApp\Calculator\CalculatorDecorator;
 use FeeCalcApp\Calculator\Config\ConfigBuilder;
+use FeeCalcApp\Calculator\Config\ConfigBuilderInterface;
 use FeeCalcApp\Calculator\Config\FilterProvider;
 use FeeCalcApp\Calculator\Config\Params\ParametersFactory;
 use FeeCalcApp\Calculator\DecisionMaker\DecisionMakerFactory;
@@ -183,7 +184,8 @@ return function(ContainerConfigurator $configurator) {
         ->tag('fee_calculator');
 
     $services
-        ->set(ConfigBuilder::class, ConfigBuilder::class)
+        ->set(ConfigBuilderInterface::class, ConfigBuilderInterface::class)
+        ->class(ConfigBuilder::class)
         ->arg(0, param('fee_calculation_config'));
 
     $services
@@ -220,8 +222,7 @@ return function(ContainerConfigurator $configurator) {
 
     $services
         ->set(FilterProvider::class, FilterProvider::class)
-        ->arg(0, service(ConfigBuilder::class))
-        ->arg(1, service(FilterCreator::class));
+        ->arg(0, service(FilterCreator::class));
 
     $services->set(ValidatorFactory::class, ValidatorFactory::class);
 
@@ -237,13 +238,13 @@ return function(ContainerConfigurator $configurator) {
     $services
         ->set(CalculatorDecorator::class, CalculatorDecorator::class)
         ->arg(0, service(FilterProvider::class))
-        ->arg(1, service(ConfigBuilder::class))
+        ->arg(1, service(ConfigBuilderInterface::class))
         ->arg(2, service(ParametersFactory::class));
 
     $services
         ->set(FeeCalculatorCollectionFactory::class, FeeCalculatorCollectionFactory::class)
         ->arg(0, tagged_iterator('fee_calculator'))
-        ->arg(1, service(ConfigBuilder::class))
+        ->arg(1, service(ConfigBuilderInterface::class))
         ->arg(2, service(CalculatorDecorator::class));
 
     $services->set(TransactionRequestMetadata::class, TransactionRequestMetadata::class)

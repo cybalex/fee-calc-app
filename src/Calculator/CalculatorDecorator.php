@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace FeeCalcApp\Calculator;
 
-use FeeCalcApp\Calculator\Config\ConfigBuilder;
+use FeeCalcApp\Calculator\Config\ConfigBuilderInterface;
 use FeeCalcApp\Calculator\Config\FilterProvider;
 use FeeCalcApp\Calculator\Config\Params\ParamBag;
 use FeeCalcApp\Calculator\Config\Params\ParametersFactory;
@@ -13,12 +13,12 @@ use RuntimeException;
 class CalculatorDecorator
 {
     private FilterProvider $filterProvider;
-    private ConfigBuilder $configBuilder;
+    private ConfigBuilderInterface $configBuilder;
     private ParametersFactory $paramFactory;
 
     public function __construct(
         FilterProvider $filterProvider,
-        ConfigBuilder $configBuilder,
+        ConfigBuilderInterface $configBuilder,
         ParametersFactory $paramFactory
     ) {
         $this->filterProvider = $filterProvider;
@@ -36,7 +36,7 @@ class CalculatorDecorator
             throw new RuntimeException(sprintf('No config for "%s" fee calculator was found in the config', $feeCalculatorClass));
         }
 
-        foreach ($this->filterProvider->get($calculatorName) as $filter) {
+        foreach ($this->filterProvider->get($calculatorName, $calculatorsConfig) as $filter) {
             $feeCalculator->addFilter($filter);
         }
     }

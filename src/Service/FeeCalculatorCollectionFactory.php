@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace FeeCalcApp\Service;
 
 use FeeCalcApp\Calculator\CalculatorDecorator;
-use FeeCalcApp\Calculator\Config\ConfigBuilder;
+use FeeCalcApp\Calculator\Config\ConfigBuilderInterface;
 use FeeCalcApp\Calculator\FeeCalculatorInterface;
 
 class FeeCalculatorCollectionFactory
 {
-    private ConfigBuilder $configBuilder;
+    private ConfigBuilderInterface $configBuilder;
     private CalculatorDecorator $calculatorDecorator;
     /**
      * @var FeeCalculatorInterface[]
@@ -19,10 +19,9 @@ class FeeCalculatorCollectionFactory
 
     public function __construct(
         iterable $feeCalculators,
-        ConfigBuilder $configBuilder,
+        ConfigBuilderInterface $configBuilder,
         CalculatorDecorator $calculatorDecorator
     ) {
-        //var_export($feeCalculators);die;
         $this->configBuilder = $configBuilder;
         $this->calculatorDecorator = $calculatorDecorator;
         foreach ($feeCalculators as $feeCalculator) {
@@ -49,17 +48,4 @@ class FeeCalculatorCollectionFactory
             }
         }
     }
-
-//
-//    private function setupCalculatorsCollection(): void
-//    {
-//        $calculatorsConfig = $this->configBuilder->getConfig();
-//
-//        foreach ($calculatorsConfig as $calculatorName => $calculatorConfig) {
-//            $calculator = clone $this->container->get($calculatorConfig['calculator']);
-//            $this->calculatorDecorator->compileFilters($calculatorName, $calculator);
-//            $this->calculatorDecorator->compileParametersConfig($calculatorName, $calculator);
-//            $this->feeCalculators[$calculatorName] = $calculator;
-//        }
-//    }
 }
