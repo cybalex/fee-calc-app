@@ -7,26 +7,26 @@ namespace FeeCalcApp\Service;
 use FeeCalcApp\DTO\TransactionDto;
 use FeeCalcApp\Service\Transaction\Processor\TransactionProcessor;
 use FeeCalcApp\Service\Transaction\TransactionContext;
-use FeeCalcApp\Service\Validation\TransactionRequestValidator;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class TransactionHandler
 {
     private array $transactionCollection = [];
 
-    private TransactionRequestValidator $transactionRequestValidator;
+    private ValidatorInterface $validator;
     private TransactionMapper $transactionMapper;
     private TransactionProcessor $transactionProcessor;
     private LoggerInterface $logger;
     private array $transactionOriginalOrder;
 
     public function __construct(
-        TransactionRequestValidator $transactionRequestValidator,
+        ValidatorInterface $validator,
         TransactionMapper $transactionMapper,
         TransactionProcessor $transactionProcessor,
         LoggerInterface $logger
     ) {
-        $this->transactionRequestValidator = $transactionRequestValidator;
+        $this->validator = $validator;
         $this->transactionMapper = $transactionMapper;
         $this->transactionProcessor = $transactionProcessor;
         $this->logger = $logger;
@@ -34,7 +34,8 @@ class TransactionHandler
 
     public function addTransaction(TransactionRequest $transactionRequest): self
     {
-        $constraintViolationList = $this->transactionRequestValidator->validate($transactionRequest);
+        $constraintViolationList = $this->validator->validate($transactionRequest);
+
         if ($constraintViolationList->count() > 0) {
             foreach ($constraintViolationList as $constraintViolation) {
                 $this->logger->warning(

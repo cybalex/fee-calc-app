@@ -11,6 +11,7 @@ use FeeCalcApp\Calculator\Fee\WithdrawalPrivateCalculator;
 use FeeCalcApp\Calculator\Fee\WithdrawalPrivateCustomCurrencyCalculator;
 use FeeCalcApp\Calculator\Filter\FilterCreator;
 use FeeCalcApp\Command\CalculateFeeCommand;
+use FeeCalcApp\Config\AppConfig;
 use FeeCalcApp\Config\CurrencyConfig;
 use FeeCalcApp\Helper\Clock\Clock;
 use FeeCalcApp\Helper\Clock\ClockInterface;
@@ -34,8 +35,6 @@ use FeeCalcApp\Service\Transaction\TransactionStorageInterface;
 use FeeCalcApp\Service\TransactionHandler;
 use FeeCalcApp\Service\TransactionHistoryManager;
 use FeeCalcApp\Service\TransactionMapper;
-use FeeCalcApp\Service\Validation\TransactionRequestMetadata;
-use FeeCalcApp\Service\Validation\TransactionRequestValidator;
 use FeeCalcApp\Service\Validation\ValidatorFactory;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
@@ -247,12 +246,6 @@ return function(ContainerConfigurator $configurator) {
         ->arg(1, service(ConfigBuilderInterface::class))
         ->arg(2, service(CalculatorDecorator::class));
 
-    $services->set(TransactionRequestMetadata::class, TransactionRequestMetadata::class)
-        ->arg(0, param('supported_currency_codes'))
-        ->arg(1, param('supported_operation_types'))
-        ->arg(2, param('supported_client_types'))
-        ->arg(3, param('date_format'));
-
     $services->set(TransactionMapper::class, TransactionMapper::class)
         ->args([
             param('date_format'),
@@ -278,16 +271,20 @@ return function(ContainerConfigurator $configurator) {
         ->args([tagged_iterator('transaction_processor_item')]);
 
     $services
-        ->set(TransactionRequestValidator::class, TransactionRequestValidator::class)
-        ->arg(0, service(ValidatorInterface::class))
-        ->arg(1, service(TransactionRequestMetadata::class));
-
-    $services
         ->set(TransactionHandler::class, TransactionHandler::class)
-        ->arg(0, service(TransactionRequestValidator::class))
+        ->arg(0, service(ValidatorInterface::class))
         ->arg(1, service(TransactionMapper::class))
         ->arg(2, service(TransactionProcessor::class))
         ->arg(3, service(LoggerInterface::class));
+
+    $services
+        ->set(AppConfig::class, AppConfig::class)
+        ->args([
+            param('supported_client_types'),
+            param('supported_operation_types'),
+            service(CurrencyConfig::class),
+            param('date_format')
+        ]);
 
     $services
         ->set(CalculateFeeCommand::class, CalculateFeeCommand::class)
@@ -296,7 +293,7 @@ return function(ContainerConfigurator $configurator) {
                 service(FileReaderInterface::class),
                 service(TransactionHandler::class),
                 service(TransactionHistoryManager::class),
-                service(CurrencyConfig::class),
+                service(AppConfig::class),
                 service(LoggerInterface::class)
             ]
         )
