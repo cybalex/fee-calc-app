@@ -6,12 +6,12 @@ namespace FeeCalcApp\Service;
 
 use DI\Container;
 use FeeCalcApp\Calculator\CalculatorDecorator;
-use FeeCalcApp\Calculator\Config\ConfigBuilder;
+use FeeCalcApp\Calculator\Config\ConfigBuilderInterface;
 use FeeCalcApp\Calculator\FeeCalculatorInterface;
 
 class FeeCalculatorCollectionFactory
 {
-    private ConfigBuilder $configBuilder;
+    private ConfigBuilderInterface $configBuilder;
 
     private Container $container;
 
@@ -19,7 +19,7 @@ class FeeCalculatorCollectionFactory
 
     // injecting container is a bad practice.
     // though there is no way to tag services in php-di for now just to inject the subset of the needed services
-    public function __construct(ConfigBuilder $configBuilder, Container $container, CalculatorDecorator $calculatorCompiler)
+    public function __construct(ConfigBuilderInterface $configBuilder, Container $container, CalculatorDecorator $calculatorCompiler)
     {
         $this->configBuilder = $configBuilder;
         $this->container = $container;

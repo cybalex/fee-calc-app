@@ -56,7 +56,7 @@ class CalculateFeeCommand extends Command
 
             if (null === $filePath = $helper->ask($input, $output, $question)) {
                 $output->write("The csv file path was a required parameter for the program to run. Exiting...\n");
-                $this->logger->error("The required \"--file\" parameter was not provided when running the \"" . self::$defaultName . "\" command");
+                $this->logger->error('The required "--file" parameter was not provided when running the "'.self::$defaultName.'" command');
 
                 return 1;
             }

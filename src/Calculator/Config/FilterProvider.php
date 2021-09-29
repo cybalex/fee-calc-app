@@ -10,22 +10,20 @@ use InvalidArgumentException;
 
 class FilterProvider
 {
-    private ConfigBuilderInterface $configBuilder;
     private FilterCreator $filterCreator;
 
-    public function __construct(ConfigBuilderInterface $configBuilder, FilterCreator $filterCreator)
+    public function __construct(FilterCreator $filterCreator)
     {
-        $this->configBuilder = $configBuilder;
         $this->filterCreator = $filterCreator;
     }
 
-    protected function getFilterConfig(string $calculatorName): array
+    protected function getFilterConfig(string $calculatorName, array $filtersConfig): array
     {
-        if (!isset($this->configBuilder->getConfig()[$calculatorName])) {
+        if (!isset($filtersConfig[$calculatorName])) {
             throw new InvalidArgumentException(sprintf('Fee calculator config was not found for %s', $calculatorName));
         }
 
-        $calculatorConfig = $this->configBuilder->getConfig()[$calculatorName];
+        $calculatorConfig = $filtersConfig[$calculatorName];
 
         return array_merge(
             ['is_enabled' => $calculatorConfig['enabled']],
@@ -36,11 +34,11 @@ class FilterProvider
     /**
      * @return FilterInterface[]
      */
-    public function get(string $calculatorName): array
+    public function get(string $calculatorName, array $filtersConfig): array
     {
         $filters = [];
 
-        foreach ($this->getFilterConfig($calculatorName) as $filterName => $filterConfig) {
+        foreach ($this->getFilterConfig($calculatorName, $filtersConfig) as $filterName => $filterConfig) {
             if (is_scalar($filterConfig)) {
                 $filterConfig = [$filterConfig];
             }

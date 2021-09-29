@@ -9,7 +9,6 @@ use FeeCalcApp\Calculator\Config\Params\ParametersFactory;
 use FeeCalcApp\Calculator\Fee\SimpleCalculator;
 use FeeCalcApp\Calculator\Fee\WithdrawalPrivateCalculator;
 use FeeCalcApp\Calculator\Fee\WithdrawalPrivateCustomCurrencyCalculator;
-use FeeCalcApp\Calculator\Filter\FilterCreator;
 use FeeCalcApp\Command\CalculateFeeCommand;
 use FeeCalcApp\Config\CurrencyConfig;
 use FeeCalcApp\Helper\Clock\Clock;
@@ -76,7 +75,7 @@ return [
         },
         FeeCalculatorCollectionFactory::class => function (Container $c) {
             return new FeeCalculatorCollectionFactory(
-                $c->get(ConfigBuilder::class),
+                $c->get(ConfigBuilderInterface::class),
                 $c,
                 $c->get(CalculatorDecorator::class)
             );
@@ -178,7 +177,7 @@ return [
                 $c->get(CurrencyConfig::class)
             );
         },
-        ConfigBuilder::class => function (Container $c) {
+        ConfigBuilderInterface::class => function (Container $c) {
             return new ConfigBuilder($c->get('fee_calculation_config'));
         },
         ParametersFactory::class => function (Container $c) {
@@ -190,17 +189,13 @@ return [
         CalculatorDecorator::class => function (Container $c) {
             return new CalculatorDecorator(
                 $c->get(FilterProvider::class),
-                $c->get(ConfigBuilder::class),
+                $c->get(ConfigBuilderInterface::class),
                 $c->get(ParametersFactory::class)
             );
         },
         FilterProvider::class => function (Container $c) {
           return new FilterProvider(
-              $c->get(ConfigBuilderInterface::class),
-              $c->get(FilterCreator::class)
+              $c->get(ConfigBuilderInterface::class)
           );
-        },
-        ConfigBuilderInterface::class => function (Container $c) {
-            return new ConfigBuilder($c->get('fee_calculation_config'));
         },
     ];
