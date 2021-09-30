@@ -15,6 +15,7 @@ class ValidatorFactory
 
         return $validatorBuilder
             ->addMethodMapping('loadValidatorMetadata')
+            ->enableAnnotationMapping()
             ->getValidator();
     }
 }

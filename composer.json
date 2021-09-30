@@ -26,6 +26,7 @@
         "php": ">=7.4",
         "ext-json": "*",
         "guzzlehttp/guzzle": "^7.3",
+        "symfony/cache": "^5.3",
         "symfony/config": "^5.3",
         "symfony/console": "^5.3",
         "symfony/dependency-injection": "^5.3",

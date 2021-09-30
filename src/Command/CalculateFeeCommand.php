@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace FeeCalcApp\Command;
 
-use FeeCalcApp\Config\CurrencyConfig;
+use FeeCalcApp\Config\AppConfig;
 use FeeCalcApp\Service\Reader\FileReaderInterface;
 use FeeCalcApp\Service\TransactionHandler;
 use FeeCalcApp\Service\TransactionHistoryManager;
@@ -28,20 +28,20 @@ class CalculateFeeCommand extends Command
 
     private TransactionHandler $transactionHandler;
     private TransactionHistoryManager $transactionHistoryManager;
-    private CurrencyConfig $currencyConfig;
+    private AppConfig $appConfig;
 
     public function __construct(
         FileReaderInterface $fileReader,
         TransactionHandler $transactionHandler,
         TransactionHistoryManager $transactionHistoryManager,
-        CurrencyConfig $currencyConfig,
+        AppConfig $appConfig,
         LoggerInterface $logger
     ) {
         parent::__construct(static::$defaultName);
         $this->fileReader = $fileReader;
         $this->transactionHandler = $transactionHandler;
         $this->transactionHistoryManager = $transactionHistoryManager;
-        $this->currencyConfig = $currencyConfig;
+        $this->appConfig = $appConfig;
         $this->logger = $logger;
     }
 
@@ -66,7 +66,7 @@ class CalculateFeeCommand extends Command
             $transactionsData = $this->fileReader->read($filePath);
 
             foreach ($transactionsData as $transactionData) {
-                $transactionRequest = new TransactionRequest();
+                $transactionRequest = new TransactionRequest($this->appConfig);
                 $transactionRequest
                     ->setUserId($transactionData[1])
                     ->setClientType($transactionData[2])
@@ -82,7 +82,7 @@ class CalculateFeeCommand extends Command
 
             foreach ($this->transactionHandler->getOriginalTransactionOrder() as $transactionKey) {
                 $processedTransaction = $this->transactionHistoryManager->get($transactionKey);
-                $scale = $this->currencyConfig->getCurrencyScale($processedTransaction->getCurrencyCode());
+                $scale = $this->appConfig->getCurrencyConfig()->getCurrencyScale($processedTransaction->getCurrencyCode());
                 $fee = (float) $processedTransaction->getFee() / (pow(10, $scale));
                 $output->write(number_format($fee, $scale, '.', ''), true);
             }
