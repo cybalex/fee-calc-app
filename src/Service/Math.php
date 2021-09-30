@@ -51,4 +51,9 @@ class Math
     {
         return bcadd($num, '0', 0);
     }
+
+    public function getScale()
+    {
+        return $this->scale;
+    }
 }

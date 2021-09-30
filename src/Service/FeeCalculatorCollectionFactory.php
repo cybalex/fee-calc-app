@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace FeeCalcApp\Service;
 
-use DI\Container;
 use FeeCalcApp\Calculator\CalculatorDecorator;
 use FeeCalcApp\Calculator\Config\ConfigBuilderInterface;
 use FeeCalcApp\Calculator\FeeCalculatorInterface;
@@ -12,40 +11,41 @@ use FeeCalcApp\Calculator\FeeCalculatorInterface;
 class FeeCalculatorCollectionFactory
 {
     private ConfigBuilderInterface $configBuilder;
-
-    private Container $container;
-
     private CalculatorDecorator $calculatorDecorator;
-
-    // injecting container is a bad practice.
-    // though there is no way to tag services in php-di for now just to inject the subset of the needed services
-    public function __construct(ConfigBuilderInterface $configBuilder, Container $container, CalculatorDecorator $calculatorCompiler)
-    {
-        $this->configBuilder = $configBuilder;
-        $this->container = $container;
-        $this->calculatorDecorator = $calculatorCompiler;
-        $this->setupCalculatorsCollection();
-    }
-
     /**
      * @var FeeCalculatorInterface[]
      */
     private array $feeCalculators = [];
+
+    public function __construct(
+        iterable $feeCalculators,
+        ConfigBuilderInterface $configBuilder,
+        CalculatorDecorator $calculatorDecorator
+    ) {
+        $this->configBuilder = $configBuilder;
+        $this->calculatorDecorator = $calculatorDecorator;
+        foreach ($feeCalculators as $feeCalculator) {
+            $this->addFeeCalculator($feeCalculator);
+        }
+    }
 
     public function get(): array
     {
         return $this->feeCalculators;
     }
 
-    private function setupCalculatorsCollection(): void
+    private function addFeeCalculator(FeeCalculatorInterface $feeCalculator)
     {
         $calculatorsConfig = $this->configBuilder->getConfig();
+        $feeCalculatorClass = get_class($feeCalculator);
 
         foreach ($calculatorsConfig as $calculatorName => $calculatorConfig) {
-            $calculator = clone $this->container->get($calculatorConfig['calculator']);
-            $this->calculatorDecorator->compileFilters($calculatorName, $calculator);
-            $this->calculatorDecorator->compileParametersConfig($calculatorName, $calculator);
-            $this->feeCalculators[$calculatorName] = $calculator;
+            if ($calculatorConfig['calculator'] === $feeCalculatorClass) {
+                $feeCalculatorClone = clone $feeCalculator;
+                $this->calculatorDecorator->compileFilters($calculatorName, $feeCalculatorClone);
+                $this->calculatorDecorator->compileParametersConfig($calculatorName, $feeCalculatorClone);
+                $this->feeCalculators[$calculatorName] = $feeCalculatorClone;
+            }
         }
     }
 }

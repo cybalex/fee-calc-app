@@ -32,9 +32,10 @@ class FilterProviderTest extends TestCase
             ->getContainer();
 
         $filterProvider = $container->get(FilterProvider::class);
+        $configBuilder = $container->get(ConfigBuilderInterface::class);
 
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Fee calculator config was not found for stdClass');
-        $filterProvider->get(stdClass::class);
+        $filterProvider->get(stdClass::class, $configBuilder->getConfig());
     }
 }

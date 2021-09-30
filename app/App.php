@@ -2,19 +2,39 @@
 
 declare(strict_types=1);
 
-use DI\Container;
-use DI\ContainerBuilder;
+use Symfony\Component\Config\FileLocator;
+use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\Loader\PhpFileLoader;
 
 class App implements AppInterface
 {
-    public function buildContainer(array $definitions = []): Container
+    public function buildContainer(array $definitions = []): ContainerBuilder
     {
-        return (new ContainerBuilder())
-            ->addDefinitions($this->getConfigDir() . 'parameters.php')
-            ->addDefinitions($this->getConfigDir() . 'fee_calculators_config.php')
-            ->addDefinitions($this->getConfigDir() . 'config.php')
-            ->addDefinitions($definitions)
-            ->build();
+        $containerBuilder = new ContainerBuilder();
+        $loader = new PhpFileLoader($containerBuilder, new FileLocator(__DIR__));
+
+        $configPaths = $this->getConfigs();
+
+        array_walk($configPaths, function(string $configPath) use ($loader) {
+            $loader->load($configPath);
+        });
+
+        foreach ($definitions as $serviceName => $service) {
+            $containerBuilder->set($serviceName, $service);
+        }
+
+        return $containerBuilder;
+    }
+
+    public function getConfigs(): array
+    {
+        return array_map(function(string $item) {
+            return $this->getConfigDir() . $item;
+        }, [
+            'parameters.php',
+            'fee_calculators_config.php',
+            'services.php'
+        ]);
     }
 
     public function getConfigDir(): string
