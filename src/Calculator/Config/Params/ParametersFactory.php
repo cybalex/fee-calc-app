@@ -27,7 +27,9 @@ class ParametersFactory
 
     public function getParamItem(string $name, $value): ParameterItemInterface
     {
-        $constrainViolationList = $this->validator->validate($value, $this->getConstraints($name));
+        $paramItem = $this->createParamItem($name, $value);
+
+        $constrainViolationList = $this->validator->validate($paramItem);
         if (count($constrainViolationList) > 0) {
             foreach ($constrainViolationList as $constraintViolation) {
                 $this->logger->critical($constraintViolation->getMessage(), [
@@ -35,8 +37,17 @@ class ParametersFactory
                     'prop_name' => $name,
                 ]);
             }
+            throw new InvalidArgumentException(sprintf('Invalid config provided for fee calculator prop %s config', $name));
         }
 
+        return $paramItem;
+    }
+
+    /**
+     * @param mixed $value
+     */
+    private function createParamItem(string $name, $value): ParameterItemInterface
+    {
         switch ($name) {
             case FeeRateParameter::PARAM_NAME:
                 return new FeeRateParameter($value);
