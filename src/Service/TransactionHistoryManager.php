@@ -55,6 +55,7 @@ class TransactionHistoryManager
                 return $this->dateTimeHelper->datesAreWithinSameWeek($transactionDto->getDate(), $transactionFromHistory->getDate())
                         && $transactionDto->getUserId() === $transactionFromHistory->getUserId()
                         && $transactionDto->getOperationType() === $transactionFromHistory->getOperationType()
+                        && $transactionDto->getClientType() === $transactionFromHistory->getClientType()
                         && $transactionDto->getDate() >= $transactionFromHistory->getDate()
                         && $transactionDto->getId() !== $transactionFromHistory->getId()
                 ;
