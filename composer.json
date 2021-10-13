@@ -25,6 +25,11 @@
     "require": {
         "php": ">=7.4",
         "ext-json": "*",
+        "ext-pdo": "*",
+        "doctrine/common": "^3.1",
+        "doctrine/migrations": "^3.2",
+        "doctrine/orm": "^2.10",
+        "doctrine/persistence": "^2.2",
         "guzzlehttp/guzzle": "^7.3",
         "symfony/cache": "^5.3",
         "symfony/config": "^5.3",

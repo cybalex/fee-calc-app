@@ -6,3 +6,5 @@ var/log
 !var/log/.gitkeep
 var/reports
 !var/reports/.gitkeep
+/docker/mysql/data/
+/.env
