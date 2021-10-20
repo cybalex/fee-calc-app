@@ -12,7 +12,7 @@ use Symfony\Component\Validator\Constraint;
 class DateTimeFormat extends Constraint
 {
     public $callback;
-    public $message = 'The provided value is not in supported date time format';
+    public string $message = 'The provided value is not in supported date time format';
 
     public function __construct(
         $callback = null,

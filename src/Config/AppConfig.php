@@ -6,21 +6,12 @@ namespace FeeCalcApp\Config;
 
 class AppConfig
 {
-    private array $supportedClientTypes;
-    private array $supportedOperationTypes;
-    private CurrencyConfig $currencyConfig;
-    private string $dateFormat;
-
     public function __construct(
-        array $supportedClientTypes,
-        array $supportedOperationTypes,
-        CurrencyConfig $currencyConfig,
-        string $dateFormat
+        private array $supportedClientTypes,
+        private array $supportedOperationTypes,
+        private CurrencyConfig $currencyConfig,
+        private string $dateFormat
     ) {
-        $this->supportedClientTypes = $supportedClientTypes;
-        $this->supportedOperationTypes = $supportedOperationTypes;
-        $this->currencyConfig = $currencyConfig;
-        $this->dateFormat = $dateFormat;
     }
 
     public function getCurrencyConfig(): CurrencyConfig

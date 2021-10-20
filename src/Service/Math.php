@@ -6,11 +6,8 @@ namespace FeeCalcApp\Service;
 
 class Math
 {
-    private int $scale;
-
-    public function __construct(int $scale)
+    public function __construct(private int $scale)
     {
-        $this->scale = $scale;
     }
 
     public function add(string $leftOperand, string $rightOperand): string
@@ -52,7 +49,7 @@ class Math
         return bcadd($num, '0', 0);
     }
 
-    public function getScale()
+    public function getScale(): int
     {
         return $this->scale;
     }

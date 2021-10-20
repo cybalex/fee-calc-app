@@ -13,27 +13,13 @@ use FeeCalcApp\Service\Transaction\TransactionStorageInterface;
 
 class TransactionHistoryManager
 {
-    private ExchangeRateClientInterface $exchangeRateClient;
-
-    private TransactionStorageInterface $transactionStorage;
-
-    private DatetimeHelper $dateTimeHelper;
-
-    private Math $math;
-    private CurrencyConfig $currencyConfig;
-
     public function __construct(
-        ExchangeRateClientInterface $exchangeRateClient,
-        TransactionStorageInterface $transactionStorageInterface,
-        DatetimeHelper $dateTimeHelper,
-        Math $math,
-        CurrencyConfig $currencyConfig
+        private ExchangeRateClientInterface $exchangeRateClient,
+        private TransactionStorageInterface $transactionStorage,
+        private DatetimeHelper $dateTimeHelper,
+        private Math $math,
+        private CurrencyConfig $currencyConfig
     ) {
-        $this->exchangeRateClient = $exchangeRateClient;
-        $this->transactionStorage = $transactionStorageInterface;
-        $this->dateTimeHelper = $dateTimeHelper;
-        $this->math = $math;
-        $this->currencyConfig = $currencyConfig;
     }
 
     public function add(ProcessedTransactionDto $processedTransactionDto): self

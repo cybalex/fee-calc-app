@@ -10,16 +10,10 @@ use FeeCalcApp\Service\TransactionHistoryManager;
 
 class HistoryManagerItem implements TransactionProcessorItemInterface
 {
-    private int $priority;
-
-    private TransactionHistoryManager $transactionHistoryManager;
-
     public function __construct(
-        TransactionHistoryManager $transactionHistoryManager,
-        int $priority
+        private TransactionHistoryManager $transactionHistoryManager,
+        private int $priority
     ) {
-        $this->priority = $priority;
-        $this->transactionHistoryManager = $transactionHistoryManager;
     }
 
     public function process(TransactionDto $transactionDto, TransactionContext $context): bool

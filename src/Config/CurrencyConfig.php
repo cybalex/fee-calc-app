@@ -12,21 +12,12 @@ class CurrencyConfig
     public const EUR_CODE = 'EUR';
     public const JPY_CODE = 'JPY';
 
-    private string $defaultCurrencyCode;
-    private array $supportedCurrencies;
-    private int $currencyDefaultScale;
-    private array $currencyScaleMap;
-
     public function __construct(
-        string $defaultCurrencyCode,
-        array $supportedCurrencies,
-        int $currencyDefaultScale,
-        array $currencyScaleMap
+        private string $defaultCurrencyCode,
+        private array $supportedCurrencies,
+        private int $currencyDefaultScale,
+        private array $currencyScaleMap
     ) {
-        $this->defaultCurrencyCode = $defaultCurrencyCode;
-        $this->supportedCurrencies = $supportedCurrencies;
-        $this->currencyDefaultScale = $currencyDefaultScale;
-        $this->currencyScaleMap = $currencyScaleMap;
     }
 
     public function getDefaultCurrencyCode(): string

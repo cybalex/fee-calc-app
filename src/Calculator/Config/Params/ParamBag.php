@@ -9,10 +9,9 @@ use FeeCalcApp\Calculator\Config\Params\Item\ParameterItemInterface;
 
 class ParamBag
 {
-    private array $parameterItems = [];
-
-    public function __construct(array $parameterItems)
-    {
+    public function __construct(
+        private array $parameterItems = []
+    ) {
         foreach ($parameterItems as $paramItem) {
             $this->addParamItem($paramItem);
         }

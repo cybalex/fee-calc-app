@@ -12,21 +12,17 @@ use FeeCalcApp\Config\CurrencyConfig;
 use FeeCalcApp\Dto\TransactionDto;
 use FeeCalcApp\Service\Math;
 use FeeCalcApp\Service\TransactionHistoryManager;
+use JetBrains\PhpStorm\Pure;
 
 class WithdrawalPrivateCalculator extends SimpleCalculator implements FeeDiscountCalculatorInterface, FilterInterface
 {
-    protected CurrencyConfig $currencyConfig;
-    private TransactionHistoryManager $transactionHistoryManager;
-
+    #[Pure]
     public function __construct(
         Math $math,
-        TransactionHistoryManager $transactionHistoryManager,
-        CurrencyConfig $currencyConfig
+        private TransactionHistoryManager $transactionHistoryManager,
+        protected CurrencyConfig $currencyConfig
     ) {
         parent::__construct($math);
-
-        $this->transactionHistoryManager = $transactionHistoryManager;
-        $this->currencyConfig = $currencyConfig;
     }
 
     public function calculate(TransactionDto $transactionDto): string

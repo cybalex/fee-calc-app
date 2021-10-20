@@ -9,6 +9,7 @@ use FeeCalcApp\DTO\ProcessedTransactionDto;
 use FeeCalcApp\DTO\TransactionDto;
 use FeeCalcApp\Service\FeeCalculatorCollectionFactory;
 use FeeCalcApp\Service\Transaction\TransactionContext;
+use JetBrains\PhpStorm\Pure;
 
 class FeeCalculationItem implements TransactionProcessorItemInterface
 {
@@ -17,12 +18,10 @@ class FeeCalculationItem implements TransactionProcessorItemInterface
      */
     private array $feeCalculators;
 
-    private int $priority;
-
-    public function __construct(FeeCalculatorCollectionFactory $feeCalculatorCollectionFactory, int $priority)
+    #[Pure]
+    public function __construct(FeeCalculatorCollectionFactory $feeCalculatorCollectionFactory, private int $priority)
     {
         $this->feeCalculators = $feeCalculatorCollectionFactory->get();
-        $this->priority = $priority;
     }
 
     public function process(TransactionDto $transactionDto, TransactionContext $context): bool

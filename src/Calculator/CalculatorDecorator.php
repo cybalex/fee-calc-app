@@ -12,18 +12,11 @@ use RuntimeException;
 
 class CalculatorDecorator
 {
-    private FilterProvider $filterProvider;
-    private ConfigBuilderInterface $configBuilder;
-    private ParametersFactory $paramFactory;
-
     public function __construct(
-        FilterProvider $filterProvider,
-        ConfigBuilderInterface $configBuilder,
-        ParametersFactory $paramFactory
+        private FilterProvider $filterProvider,
+        private ConfigBuilderInterface $configBuilder,
+        private ParametersFactory $paramFactory
     ) {
-        $this->filterProvider = $filterProvider;
-        $this->configBuilder = $configBuilder;
-        $this->paramFactory = $paramFactory;
     }
 
     public function compileFilters(string $calculatorName, FeeCalculatorInterface $feeCalculator): void

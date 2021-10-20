@@ -6,11 +6,9 @@ namespace FeeCalcApp\DTO;
 
 class ProcessedTransactionDto extends AbstractTransaction
 {
-    private string $fee;
-
     public function __construct(
         TransactionDto $transactionDto,
-        string $fee
+        private string $fee
     ) {
         $this->userId = $transactionDto->getUserId();
         $this->clientType = $transactionDto->getClientType();
@@ -19,7 +17,6 @@ class ProcessedTransactionDto extends AbstractTransaction
         $this->amount = $transactionDto->getAmount();
         $this->operationType = $transactionDto->getOperationType();
         $this->id = $transactionDto->getId();
-        $this->fee = $fee;
     }
 
     public function getFee(): string

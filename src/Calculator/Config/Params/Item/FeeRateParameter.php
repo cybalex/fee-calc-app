@@ -4,15 +4,13 @@ declare(strict_types=1);
 
 namespace FeeCalcApp\Calculator\Config\Params\Item;
 
-use Symfony\Component\Validator\Constraints as Assert;
-
 class FeeRateParameter implements ParameterItemInterface
 {
     public const PARAM_NAME = 'fee_rate';
 
     /**
-     * @Assert\NotNull()
-     * @Assert\Regex(pattern="/^(0|[1-9]\d*)(.\d+)?$/", message="Amount in wrong format was provided")
+     * #[Assert\NotNull()]
+     * #[Assert\Regex(pattern: "/^(0|[1-9]\d*)(.\d+)?$/", message: "Amount in wrong format was provided")].
      */
     private float $value;
 
@@ -21,7 +19,7 @@ class FeeRateParameter implements ParameterItemInterface
         $this->value = $value;
     }
 
-    public function getValue()
+    public function getValue(): bool|array|int|float|string
     {
         return $this->value;
     }

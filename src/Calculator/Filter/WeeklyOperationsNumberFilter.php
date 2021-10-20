@@ -10,17 +10,14 @@ use FeeCalcApp\Service\TransactionHistoryManager;
 
 class WeeklyOperationsNumberFilter extends AbstractFilter
 {
-    private TransactionHistoryManager $transactionHistoryManager;
-
     public function __construct(
-        TransactionHistoryManager $transactionHistoryManager,
+        private TransactionHistoryManager $transactionHistoryManager,
         int $value,
         string $comparison,
         DecisionMakerFactory $decisionMakerFactory
     ) {
         parent::__construct($decisionMakerFactory);
         $this->checkComparisonSupport($comparison);
-        $this->transactionHistoryManager = $transactionHistoryManager;
         $this->valuesToCompareWith = [$value];
         $this->comparison = $comparison;
     }

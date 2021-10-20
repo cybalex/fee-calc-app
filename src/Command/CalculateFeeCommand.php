@@ -22,27 +22,14 @@ class CalculateFeeCommand extends Command
 {
     protected static $defaultName = 'fee.calculate';
 
-    private FileReaderInterface $fileReader;
-
-    private LoggerInterface $logger;
-
-    private TransactionHandler $transactionHandler;
-    private TransactionHistoryManager $transactionHistoryManager;
-    private AppConfig $appConfig;
-
     public function __construct(
-        FileReaderInterface $fileReader,
-        TransactionHandler $transactionHandler,
-        TransactionHistoryManager $transactionHistoryManager,
-        AppConfig $appConfig,
-        LoggerInterface $logger
+        private FileReaderInterface $fileReader,
+        private TransactionHandler $transactionHandler,
+        private TransactionHistoryManager $transactionHistoryManager,
+        private AppConfig $appConfig,
+        private LoggerInterface $logger
     ) {
         parent::__construct(static::$defaultName);
-        $this->fileReader = $fileReader;
-        $this->transactionHandler = $transactionHandler;
-        $this->transactionHistoryManager = $transactionHistoryManager;
-        $this->appConfig = $appConfig;
-        $this->logger = $logger;
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)

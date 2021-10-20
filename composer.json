@@ -26,6 +26,7 @@
         "php": "^8.0",
         "ext-json": "*",
         "ext-pdo": "*",
+        "ext-bcmath": "*",
         "doctrine/common": "^3.1",
         "doctrine/migrations": "^3.2",
         "doctrine/orm": "^2.10",
