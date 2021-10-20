@@ -20,7 +20,7 @@ class ExchangeRateHttpClientTest extends TestCase
      */
     private $logger;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->currencyConfig = new CurrencyConfig(
             'USD',

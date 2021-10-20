@@ -68,12 +68,12 @@ class CalculateFeeCommand extends Command
             foreach ($transactionsData as $transactionData) {
                 $transactionRequest = new TransactionRequest($this->appConfig);
                 $transactionRequest
-                    ->setUserId($transactionData[1])
-                    ->setClientType($transactionData[2])
-                    ->setDate($transactionData[0])
-                    ->setOperationType($transactionData[3])
-                    ->setCurrencyCode($transactionData[5])
-                    ->setAmount($transactionData[4]);
+                    ->setUserId($transactionData[1] ?? null)
+                    ->setClientType($transactionData[2] ?? null)
+                    ->setDate($transactionData[0] ?? null)
+                    ->setOperationType($transactionData[3] ?? null)
+                    ->setCurrencyCode($transactionData[5] ?? null)
+                    ->setAmount($transactionData[4] ?? null);
 
                 $this->transactionHandler->addTransaction($transactionRequest);
             }

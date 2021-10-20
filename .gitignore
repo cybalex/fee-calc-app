@@ -8,3 +8,4 @@ var/reports
 !var/reports/.gitkeep
 /docker/mysql/data/
 /.env
+.phpunit.result.cache
