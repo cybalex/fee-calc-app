@@ -69,7 +69,7 @@ class ExchangeRateHttpClient implements ExchangeRateClientInterface
 
         $exchangeRates = [];
 
-        $quotes = $responseData['quotes'];
+        $quotes = $responseData['quotes'] ?? null;
 
         $defaultCurrencyCode = $this->currencyConfig->getDefaultCurrencyCode();
 
