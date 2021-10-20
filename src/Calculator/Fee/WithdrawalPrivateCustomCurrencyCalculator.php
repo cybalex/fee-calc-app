@@ -9,15 +9,15 @@ use FeeCalcApp\DTO\TransactionDto;
 use FeeCalcApp\Service\ExchangeRate\ExchangeRateClientInterface;
 use FeeCalcApp\Service\Math;
 use FeeCalcApp\Service\TransactionHistoryManager;
+use JetBrains\PhpStorm\Pure;
 
 class WithdrawalPrivateCustomCurrencyCalculator extends WithdrawalPrivateCalculator
 {
-    private ExchangeRateClientInterface $exchangeRateClient;
-
+    #[Pure]
     public function __construct(
         Math $math,
         TransactionHistoryManager $transactionHistoryManager,
-        ExchangeRateClientInterface $exchangeRateClient,
+        private ExchangeRateClientInterface $exchangeRateClient,
         CurrencyConfig $currencyConfig
     ) {
         parent::__construct(
@@ -25,7 +25,6 @@ class WithdrawalPrivateCustomCurrencyCalculator extends WithdrawalPrivateCalcula
             $transactionHistoryManager,
             $currencyConfig,
         );
-        $this->exchangeRateClient = $exchangeRateClient;
     }
 
     protected function getDiscountInTransactionCurrency(

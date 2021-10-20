@@ -14,11 +14,8 @@ abstract class AbstractFilter implements FilterInterface, ComparisonInterface
 
     protected string $comparison;
 
-    private DecisionMakerFactory $decisionMakerFactory;
-
-    public function __construct(DecisionMakerFactory $decisionMakerFactory)
+    public function __construct(private DecisionMakerFactory $decisionMakerFactory)
     {
-        $this->decisionMakerFactory = $decisionMakerFactory;
     }
 
     public function evaluate($value1, $value2, string $comparison): bool

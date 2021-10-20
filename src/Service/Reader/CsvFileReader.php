@@ -11,11 +11,9 @@ use RuntimeException;
 class CsvFileReader implements FileReaderInterface
 {
     private const CSV_SEPARATOR = ',';
-    private FileInfoInterface $fileInfo;
 
-    public function __construct(FileInfoInterface $fileInfo)
+    public function __construct(private FileInfoInterface $fileInfo)
     {
-        $this->fileInfo = $fileInfo;
     }
 
     public function read(string $filePath): array

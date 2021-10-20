@@ -6,10 +6,7 @@ namespace FeeCalcApp\Calculator\Config\Params\Item;
 
 interface ParameterItemInterface
 {
-    /**
-     * @return bool|array|int|float|string
-     */
-    public function getValue();
+    public function getValue(): bool|array|int|float|string;
 
     /**
      * A name of a config parameter.

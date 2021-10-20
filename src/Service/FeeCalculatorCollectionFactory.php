@@ -10,8 +10,6 @@ use FeeCalcApp\Calculator\FeeCalculatorInterface;
 
 class FeeCalculatorCollectionFactory
 {
-    private ConfigBuilderInterface $configBuilder;
-    private CalculatorDecorator $calculatorDecorator;
     /**
      * @var FeeCalculatorInterface[]
      */
@@ -19,11 +17,9 @@ class FeeCalculatorCollectionFactory
 
     public function __construct(
         iterable $feeCalculators,
-        ConfigBuilderInterface $configBuilder,
-        CalculatorDecorator $calculatorDecorator
+        private ConfigBuilderInterface $configBuilder,
+        private CalculatorDecorator $calculatorDecorator
     ) {
-        $this->configBuilder = $configBuilder;
-        $this->calculatorDecorator = $calculatorDecorator;
         foreach ($feeCalculators as $feeCalculator) {
             $this->addFeeCalculator($feeCalculator);
         }

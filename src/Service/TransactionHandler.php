@@ -13,23 +13,14 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 class TransactionHandler
 {
     private array $transactionCollection = [];
-
-    private ValidatorInterface $validator;
-    private TransactionMapper $transactionMapper;
-    private TransactionProcessor $transactionProcessor;
-    private LoggerInterface $logger;
     private array $transactionOriginalOrder;
 
     public function __construct(
-        ValidatorInterface $validator,
-        TransactionMapper $transactionMapper,
-        TransactionProcessor $transactionProcessor,
-        LoggerInterface $logger
+        private ValidatorInterface $validator,
+        private TransactionMapper $transactionMapper,
+        private TransactionProcessor $transactionProcessor,
+        private LoggerInterface $logger
     ) {
-        $this->validator = $validator;
-        $this->transactionMapper = $transactionMapper;
-        $this->transactionProcessor = $transactionProcessor;
-        $this->logger = $logger;
     }
 
     public function addTransaction(TransactionRequest $transactionRequest): self

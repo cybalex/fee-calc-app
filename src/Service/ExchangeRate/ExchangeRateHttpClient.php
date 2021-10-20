@@ -6,6 +6,7 @@ namespace FeeCalcApp\Service\ExchangeRate;
 
 use FeeCalcApp\Config\CurrencyConfig;
 use FeeCalcApp\Exception\BadResponseException;
+use JsonException;
 use Psr\Log\LoggerInterface;
 use RuntimeException;
 use Throwable;
@@ -15,22 +16,14 @@ class ExchangeRateHttpClient implements ExchangeRateClientInterface
     private const MAX_RETRY_COUNT = 3;
     private const RETRY_INTERVAL_SEC = 1;
 
-    private string $currencyApiUrl;
-    private string $currencyApiKey;
-    private LoggerInterface $logger;
-    private CurrencyConfig $currencyConfig;
     private array $exchangeRates = [];
 
     public function __construct(
-        string $currencyApiUrl,
-        string $currencyApiKey,
-        CurrencyConfig $currencyConfig,
-        LoggerInterface $logger
+        private string $currencyApiUrl,
+        private string $currencyApiKey,
+        private CurrencyConfig $currencyConfig,
+        private LoggerInterface $logger
     ) {
-        $this->currencyApiUrl = $currencyApiUrl;
-        $this->currencyApiKey = $currencyApiKey;
-        $this->currencyConfig = $currencyConfig;
-        $this->logger = $logger;
     }
 
     /**
@@ -69,7 +62,7 @@ class ExchangeRateHttpClient implements ExchangeRateClientInterface
 
         $exchangeRates = [];
 
-        $quotes = $responseData['quotes'];
+        $quotes = $responseData['quotes'] ?? null;
 
         $defaultCurrencyCode = $this->currencyConfig->getDefaultCurrencyCode();
 
@@ -99,7 +92,7 @@ class ExchangeRateHttpClient implements ExchangeRateClientInterface
             }
 
             return $responseData;
-        } catch (\JsonException $e) {
+        } catch (JsonException $e) {
             throw new \RuntimeException('Failed to decode remote server response');
         } catch (Throwable $e) {
             $errorMessage = sprintf(

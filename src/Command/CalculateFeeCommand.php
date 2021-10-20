@@ -22,27 +22,14 @@ class CalculateFeeCommand extends Command
 {
     protected static $defaultName = 'fee.calculate';
 
-    private FileReaderInterface $fileReader;
-
-    private LoggerInterface $logger;
-
-    private TransactionHandler $transactionHandler;
-    private TransactionHistoryManager $transactionHistoryManager;
-    private AppConfig $appConfig;
-
     public function __construct(
-        FileReaderInterface $fileReader,
-        TransactionHandler $transactionHandler,
-        TransactionHistoryManager $transactionHistoryManager,
-        AppConfig $appConfig,
-        LoggerInterface $logger
+        private FileReaderInterface $fileReader,
+        private TransactionHandler $transactionHandler,
+        private TransactionHistoryManager $transactionHistoryManager,
+        private AppConfig $appConfig,
+        private LoggerInterface $logger
     ) {
         parent::__construct(static::$defaultName);
-        $this->fileReader = $fileReader;
-        $this->transactionHandler = $transactionHandler;
-        $this->transactionHistoryManager = $transactionHistoryManager;
-        $this->appConfig = $appConfig;
-        $this->logger = $logger;
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
@@ -68,12 +55,12 @@ class CalculateFeeCommand extends Command
             foreach ($transactionsData as $transactionData) {
                 $transactionRequest = new TransactionRequest($this->appConfig);
                 $transactionRequest
-                    ->setUserId($transactionData[1])
-                    ->setClientType($transactionData[2])
-                    ->setDate($transactionData[0])
-                    ->setOperationType($transactionData[3])
-                    ->setCurrencyCode($transactionData[5])
-                    ->setAmount($transactionData[4]);
+                    ->setUserId($transactionData[1] ?? null)
+                    ->setClientType($transactionData[2] ?? null)
+                    ->setDate($transactionData[0] ?? null)
+                    ->setOperationType($transactionData[3] ?? null)
+                    ->setCurrencyCode($transactionData[5] ?? null)
+                    ->setAmount($transactionData[4] ?? null);
 
                 $this->transactionHandler->addTransaction($transactionRequest);
             }

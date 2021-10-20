@@ -9,12 +9,9 @@ use FeeCalcApp\DTO\TransactionDto;
 
 class IsEnabledFilter extends AbstractFilter
 {
-    private bool $isEnabled;
-
-    public function __construct(bool $isEnabled, DecisionMakerFactory $decisionMakerFactory)
+    public function __construct(private bool $isEnabled, DecisionMakerFactory $decisionMakerFactory)
     {
         parent::__construct($decisionMakerFactory);
-        $this->isEnabled = $isEnabled;
         $this->comparison = self::COMPARISON_EQUALS;
         $this->valuesToCompareWith = [true];
     }

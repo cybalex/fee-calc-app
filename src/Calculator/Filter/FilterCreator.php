@@ -10,15 +10,10 @@ use InvalidArgumentException;
 
 class FilterCreator
 {
-    private TransactionHistoryManager $transactionHistoryManager;
-    private DecisionMakerFactory $decisionMakerFactory;
-
     public function __construct(
-        TransactionHistoryManager $transactionHistoryManager,
-        DecisionMakerFactory $decisionMakerFactory
+        private TransactionHistoryManager $transactionHistoryManager,
+        private DecisionMakerFactory $decisionMakerFactory
     ) {
-        $this->transactionHistoryManager = $transactionHistoryManager;
-        $this->decisionMakerFactory = $decisionMakerFactory;
     }
 
     public function getFilterInstance(string $filterName, array $filtersConfig): FilterInterface

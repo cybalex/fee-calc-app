@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace FeeCalcApp\DTO;
 
+use DateTime;
+
 interface TransactionInterface
 {
     public function getId(): string;
 
-    public function getDate(): \DateTime;
+    public function getDate(): DateTime;
 
     public function getUserId(): int;
 

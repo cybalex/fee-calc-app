@@ -10,11 +10,8 @@ use FeeCalcApp\Service\Math;
 
 class SimpleCalculator extends AbstractCalculator
 {
-    protected Math $math;
-
-    public function __construct(Math $math)
+    public function __construct(protected Math $math)
     {
-        $this->math = $math;
     }
 
     public function calculate(TransactionDto $transactionDto): string

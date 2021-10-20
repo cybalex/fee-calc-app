@@ -1,6 +1,6 @@
-FROM php:7.4-alpine
+FROM php:alpine
 
-ENV COMPOSER_VERSION 2.1.6
+ENV COMPOSER_VERSION 2.1.9
 
 RUN set -ex; \
     docker-php-ext-install bcmath 1>/dev/null
@@ -15,6 +15,9 @@ RUN set -ex; \
     apk add --update $PHPIZE_DEPS \
     && pecl install pcov \
 	&& docker-php-ext-enable pcov
+
+RUN set -ex; \
+    docker-php-ext-install pdo_mysql
 
 RUN mkdir -p /var/www/fee-calculator
 WORKDIR /var/www/fee-calculator

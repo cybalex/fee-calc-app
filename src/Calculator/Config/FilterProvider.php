@@ -10,11 +10,8 @@ use InvalidArgumentException;
 
 class FilterProvider
 {
-    private FilterCreator $filterCreator;
-
-    public function __construct(FilterCreator $filterCreator)
+    public function __construct(private FilterCreator $filterCreator)
     {
-        $this->filterCreator = $filterCreator;
     }
 
     protected function getFilterConfig(string $calculatorName, array $filtersConfig): array

@@ -7,6 +7,7 @@ namespace FeeCalcApp\Service;
 use DateTime;
 use FeeCalcApp\Config\AppConfig;
 use FeeCalcApp\Service\Validation\Validator as AppAssert;
+use JetBrains\PhpStorm\Pure;
 use Symfony\Component\Validator\Constraints as Assert;
 
 class TransactionRequest
@@ -52,6 +53,7 @@ class TransactionRequest
     private array $supportedCurrencyCodes = [];
     private string $supportedDateFormat;
 
+    #[Pure]
     public function __construct(AppConfig $appConfig)
     {
         $this->supportedClientTypes = $appConfig->getSupportedClientTypes();

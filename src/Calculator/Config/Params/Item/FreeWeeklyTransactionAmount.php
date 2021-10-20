@@ -4,15 +4,13 @@ declare(strict_types=1);
 
 namespace FeeCalcApp\Calculator\Config\Params\Item;
 
-use Symfony\Component\Validator\Constraints as Assert;
-
 class FreeWeeklyTransactionAmount implements ParameterItemInterface
 {
     public const PARAM_NAME = 'free_weekly_transaction_amount';
 
     /**
-     * @Assert\NotNull()
-     * @Assert\Regex(pattern="/^(0|[1-9]\d*)(.\d+)?$/", message="Amount in wrong format was provided")
+     * #[Assert\NotNull()]
+     * #[Assert\Regex(pattern: "/^(0|[1-9]\d*)(.\d+)?$/", message: "Amount in wrong format was provided")].
      */
     private float $value;
 

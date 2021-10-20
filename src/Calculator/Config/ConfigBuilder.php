@@ -8,12 +8,10 @@ use InvalidArgumentException;
 
 class ConfigBuilder implements ConfigBuilderInterface
 {
-    private array $rawConfig;
     private ?array $config = null;
 
-    public function __construct(array $rawConfig)
+    public function __construct(private array $rawConfig)
     {
-        $this->rawConfig = $rawConfig;
     }
 
     public function getConfig(): array
