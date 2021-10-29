@@ -36,7 +36,7 @@ class FileLogger extends AbstractLogger
         }
     }
 
-    public function log($level, $message, array $context = [])
+    public function log($level, $message, array $context = []): void
     {
         $dateTime = $this->clock->getCurrentDateTime();
         $splFile = $this->splFileInfo->openFile('a');
